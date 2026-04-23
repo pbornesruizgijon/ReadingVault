@@ -19,4 +19,5 @@ public class Libro {
     @Column(columnDefinition = "TEXT") // Para descripciones largas
     private String descripcion;
     private String fechaPublicacion;
+    private String fotoPortada;
 }

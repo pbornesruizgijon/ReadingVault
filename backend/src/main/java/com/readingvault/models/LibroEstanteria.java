@@ -1,12 +1,15 @@
 package com.readingvault.models;
 
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import lombok.Data;
 
 @Data
@@ -24,5 +27,11 @@ public class LibroEstanteria {
     @JoinColumn(name = "id_libro")
     private Libro libro;
 
-    private String fechaAgregado;
+    private LocalDate fechaAgregado;
+
+    // se ejecuta automáticamente antes de guardar en la DB
+    @PrePersist
+    protected void onCreate() {
+        this.fechaAgregado = LocalDate.now();
+    }
 }
