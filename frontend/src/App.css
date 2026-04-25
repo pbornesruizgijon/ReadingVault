@@ -1,17 +1,19 @@
+/* App.css - Estilos específicos de componentes y utilidades */
+
 .landing {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%; 
+  padding: 0;
   text-align: center;
 }
 
-.hero {
-  background: #fdf6e3;
-  padding: 4rem 2rem;
-  border-radius: 20px;
-  margin-bottom: 2rem;
+/* Las secciones de la landing ocupan todo el ancho para permitir fondos infinitos */
+.hero, .servicios, .pasos, .nosotros, .empieza {
+  width: 100%;
+  padding: 4rem 0;
+  margin: 0;
 }
 
+/* --- BUSCADOR --- */
 .search-box {
   margin-top: 2rem;
   display: flex;
@@ -23,18 +25,28 @@ input {
   padding: 12px 20px;
   width: 300px;
   border-radius: 25px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
+  font-family: var(--font-body);
 }
 
+/* Botón general */
 button {
   padding: 12px 25px;
   border-radius: 25px;
   border: none;
-  background: #8b4513;
+  background: var(--color-salmon);
   color: white;
   cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: background 0.3s ease;
 }
 
+button:hover {
+  background: var(--color-marron-medio);
+}
+
+/* --- GRID DE LIBROS --- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -43,14 +55,22 @@ button {
 }
 
 .card {
-  border: 1px solid #eee;
-  padding: 10px;
-  border-radius: 10px;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
 }
 
 .card img {
   width: 100%;
   height: 280px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }

@@ -1,0 +1,119 @@
+/* src/assets/css/buscador.css */
+
+/* Bloque Principal */
+.buscador-page {
+    background-color: var(--color-azul-claro); 
+    min-height: 100vh;
+    padding: 40px 0;
+    font-family: var(--font-body);
+}
+
+/* Contenedor del buscador */
+.search-bar {
+    background-color: var(--color-azul-footer); 
+    padding: 15px 40px;
+    border-radius: 50px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.search-bar__form {
+    display: flex;
+    width: 100%;
+    max-width: 650px;
+    background-color: white;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.search-bar__icon {
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    color: var(--text-body);
+}
+
+.search-bar__input {
+    flex: 1;
+    border: none;
+    padding: 12px 10px;
+    font-size: 1rem;
+    outline: none;
+    font-family: var(--font-body);
+}
+
+.search-bar__button {
+    background-color: var(--color-salmon);
+    color: white;
+    border: none;
+    padding: 0 30px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: var(--font-body);
+    transition: 0.3s;
+}
+
+/* src/assets/css/buscador.css */
+
+.ver-mas-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 60px; 
+    padding-bottom: 40px; 
+}
+
+.btn-ver-mas {
+    background-color: var(--color-salmon);
+    color: white;
+    border: none;
+    padding: 12px 45px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.btn-ver-mas:hover {
+    background-color: var(--color-amarillo);
+    color: var(--color-marron-oscuro);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.search-bar__button:hover {
+    background-color: var(--color-verde-oscuro); 
+}
+
+/* Grid de libros */
+.libros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+}
+
+.libros-grid__mensaje {
+    text-align: center;
+    grid-column: 1/-1;
+    color: var(--text-body);
+    margin-top: 50px;
+}
+
+/* Select de ordenación */
+.sort-section {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.sort-section__select {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--color-azul-footer);
+    font-family: var(--font-body);
+    color: var(--text-body);
+}

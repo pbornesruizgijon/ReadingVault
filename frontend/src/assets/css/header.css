@@ -1,0 +1,98 @@
+/* src/assets/css/header.css */
+
+.navbar-custom {
+  background-color: var(--color-azul-footer);
+  height: 75px; 
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 1000;
+}
+
+/* --- ESTILO DEL LOGO Y MARCA --- */
+.navbar-custom__brand {
+  display: flex;
+  align-items: center;
+  gap: 15px; 
+  text-decoration: none;
+}
+
+/* Contenedor circular blanco */
+.navbar-custom__logo-circle {
+  background-color: white;
+  width: 55px; 
+  height: 55px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.navbar-custom__logo-img {
+  width: 160%;
+  height: 160%;
+  object-fit: contain;
+}
+
+/* --- TIPOGRAFÍA ARIMA PARA EL LOGO --- */
+.navbar-custom__brand-text {
+  font-family: var(--font-titulos);
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+}
+
+.navbar-custom__brand--reading {
+  color: var(--color-verde-oscuro); 
+  font-family: var(--font-titulos);
+}
+
+.navbar-custom__brand--vault {
+  color: var(--color-amarillo);
+  margin-left: 5px;
+  font-family: var(--font-titulos);
+}
+
+/* --- ENLACES DEL MENÚ --- */
+.navbar-custom__link {
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-marron-medio);
+  transition: color 0.3s ease;
+}
+
+.navbar-custom__link:hover {
+  color: var(--color-amarillo);
+}
+
+/* Separador visual */
+.navbar-custom__divider {
+  width: 1px;
+  height: 25px;
+  background-color: rgba(0,0,0,0.1);
+  margin: 0 5px;
+}
+
+/* --- BOTÓN LOG IN --- */
+.navbar-custom__auth-btn {
+  background-color: var(--color-salmon);
+  color: white !important;
+  text-decoration: none;
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.navbar-custom__auth-btn:hover {
+  background-color: var(--color-verde-oscuro);
+  transform: translateY(-2px);
+}

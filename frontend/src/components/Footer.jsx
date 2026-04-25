@@ -1,47 +1,72 @@
 import { Link } from 'react-router-dom';
+import '../assets/css/footer.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
-export default function Footer(){
-    return(
-        <section className="footer">
-            <div className="footer__slogan">
-                <h2 className="slogan__titulo">Reading<span className="slogan__titulo--amarillo">Vault</span></h2>
-                <p className="slogan__descripcion">Tu refugio personal para cada libro que formará parte de tu viaje literario</p>
-                <div className="slogan__redes">
-                    <img src="" alt="facebook" className="slogan__red"/>
-                    <img src="" alt="twitter" className="slogan__red"/>
-                    <img src="" alt="instagram" className="slogan__red"/>
+export default function Footer() {
+    return (
+        <footer className="footer-custom">
+            <div className="container">
+                <div className="row align-items-center">
+                    
+                    {/* IZQUIERDA: Titulo, slogan y redes */}
+                    <div className="col-md-4 text-center text-md-start mb-4 mb-md-0">
+                        <h2 className="fw-bold fs-1">
+                            <span style={{ color: "var(--color-verde-oscuro)" }}>Reading</span> <span style={{ color: "var(--color-amarillo)" }}>Vault</span>
+                        </h2>
+                        <p className="mt-3 slogan__descripcion">
+                            Tu refugio personal para cada libro que formará parte de tu viaje literario
+                        </p>
+                        <div className="d-flex gap-3 justify-content-center justify-content-md-start mt-4">
+                            <a href="#" className="footer__social-icon"><i className="bi bi-facebook"></i></a>
+                            <a href="#" className="footer__social-icon"><i className="bi bi-twitter-x"></i></a>
+                            <a href="#" className="footer__social-icon"><i className="bi bi-instagram"></i></a>
+                        </div>
+                    </div>
+
+                    {/* CENTRO: Logo circular */}
+                    <div className="col-md-4 text-center mb-4 mb-md-0">
+                        <div className="footer__logo-circle">
+                            <img 
+                                src="/img/logo-vault.png" 
+                                alt="logo" 
+                                className="footer__logo-img"
+                            />
+                        </div>
+                    </div>
+
+                    {/* DERECHA: Enlaces en dos minicolumnas */}
+                    <div className="col-md-4">
+                        <div className="row">
+                            <div className="col-6 text-center text-md-start">
+                                <h4 className="footer__column-title">ReadingVault</h4>
+                                <ul className="footer__list">
+                                    <li><Link to="/buscador" className="footer__link">Libros</Link></li>
+                                    <li><Link to="/buscador" className="footer__link">Explorar</Link></li>
+                                </ul>
+                            </div>
+                            <div className="col-6 text-center text-md-start">
+                                <h4 className="footer__column-title">Comunidad</h4>
+                                <ul className="footer__list">
+                                    <li><Link to="/comunidad" className="footer__link">Grupos de lectura</Link></li>
+                                    <li><Link to="/invitar" className="footer__link">Invitar a un amigo</Link></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* LINEA Y LEGAL (ABAJO) */}
+                <hr className="footer__divider" />
+                <div className="row footer__bottom-row align-items-center">
+                    <div className="col-md-6 text-center text-md-start small">
+                        ©2026. Todos los derechos reservados
+                    </div>
+                    <div className="col-md-6 text-center text-md-end mt-2 mt-md-0 small">
+                        <Link to="/privacidad" className="footer__link d-inline me-3 opacity-75">Política de privacidad</Link>
+                        <Link to="/condiciones" className="footer__link d-inline opacity-75">Términos y condiciones</Link>
+                    </div>
                 </div>
             </div>
-
-            <div className="footer__logo">
-                <picture className="logo__picture">
-                    <img src="" alt="logo" className="logo__img"/>
-                </picture>
-            </div>
-
-            <div className="footer__enlaces">
-                <div className="enlaces__web">
-                    <h2 className="web__titulo"><a href="" className="web__enlace--grande">ReadingVault</a></h2>
-                    <Link to="/buscadorLibros" className="web__enlace">Libros</Link>
-                    <Link to="/explorar" className="web__enlace">Explorar</Link>
-                </div>
-                <div className="enlaces__comunidad">
-                    <h2 className="comunidad__titulo"><a href="" className="comunidad__enlace--grande">ReadingVault</a></h2>
-                    <Link to="/comunidad" className="comunidad__enlace">Grupos de lectura</Link>
-                    <Link to="/invitarAmigo" className="comunidad__enlace">invitar a un amigo</Link>
-                </div>
-            </div>
-
-            <div className="footer__legal">
-                <div className="legal__derechos">
-                    <p>2026. Todos los derechos reservados</p>
-                </div>
-
-                <div className="legal__enlaces">
-                    <Link to="/privacidad" className="legal__enlace">Política de privacidad</Link>
-                    <Link to="/condiciones" className="legal__enlace">Términos y condiciones</Link>
-                </div>
-            </div>
-        </section>
-    )
+        </footer>
+    );
 }

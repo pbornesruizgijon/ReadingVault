@@ -1,83 +1,93 @@
+/* src/assets/css/hero.css */
+
 .hero {
     display: flex;
     align-items: center;
-    height: 80vh; 
-    background-color: #d1f7e6; 
+    /* Reducimos la altura mínima para que no sea tan gigante */
+    min-height: 60vh; 
+    width: 100%;
+    background-color: var(--color-azul-claro);
     overflow: hidden;
     position: relative;
+    /* Reducimos el padding superior e inferior */
+    padding: 20px 0; 
 }
 
-/* --- SECCIÓN TEXTO  --- */
-.hero__texto {
-    flex: 1;
+/* --- CONTENEDOR DEL TEXTO --- */
+.hero__content {
+    display: flex;
+    justify-content: center; 
+    z-index: 10;
+}
+
+.hero__texto-bloque {
+    max-width: 550px;
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 0 5%;
-    /* Para que esté por encima */
-    z-index: 2; 
 }
 
-.texto__letras {
-    font-size: 4rem;
-    color: #4a5d4e;
+/* --- AJUSTE DE TAMAÑOS --- */
+.hero__titulo {
+    font-family: var(--font-titulos);
+    /* Bajamos un poco el tamaño para que sea más compacto */
+    font-size: 4rem; 
+    color: var(--color-marron-oscuro);
     margin: 0;
-    line-height: 1.1;
+    line-height: 1;
 }
 
-.texto__letras--amarillo {
-    color: #f2c94c;
+.hero__titulo--amarillo {
+    color: var(--color-amarillo);
     display: block;
-    margin-top: 10px;
+    margin-top: 2px;
 }
 
-.texto__h3 {
-    font-size: 1.2rem;
-    color: #333;
-    max-width: 400px;
-    margin: 30px 0;
+.hero__slogan {
+    font-family: var(--font-body);
+    font-size: 1.15rem; /* Un poco más pequeño */
+    color: var(--text-body);
+    max-width: 420px;
+    /* Reducimos márgenes entre elementos */
+    margin: 20px 0; 
     font-weight: 400;
 }
 
-.texto__enlace {
+/* --- BOTÓN --- */
+.hero__boton {
     display: inline-block;
-    background-color: #c5867a;
+    background-color: var(--color-salmon);
     color: white;
     text-decoration: none;
-    padding: 15px 50px;
-    border-radius: 30px;
+    padding: 14px 45px; /* Botón un poco más fino */
+    border-radius: 50px;
     font-weight: bold;
-    letter-spacing: 1px;
-    transition: transform 0.3s, background-color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    transition: all 0.3s ease;
 }
 
-.texto__enlace:hover {
-    background-color: #b0756a;
-    transform: scale(1.05);
+.hero__boton:hover {
+    background-color: var(--color-verde-oscuro);
+    transform: translateY(-2px);
 }
 
-/* --- SECCIÓN IMAGEN --- */
-.hero__img {
-    flex: 1;
+/* --- IMAGEN DECORATIVA --- */
+.hero__img-wrap {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%; /* Ajustamos el ancho */
     height: 100%;
-    position: relative;
-}
-
-.img__picture, .img__imagen {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-
-.hero__img {
-    clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 25% 100%, 0% 50%); 
-    clip-path: path('M150 0 L1000 0 L1000 1000 L150 1000 C-50 800 250 600 50 400 C-50 200 200 0 150 0 Z');
+    z-index: 1;
+    
+    /* Mantenemos el clip-path curvo */
     clip-path: ellipse(80% 100% at 90% 50%);
 }
 
-.hero__img {
-    clip-path: ellipse(100% 120% at 100% 50%);
+.hero__img-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }

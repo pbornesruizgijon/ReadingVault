@@ -1,75 +1,116 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import LibroCard from '../components/LibroCard';
-import SidebarGeneros from '../components/SidebarGeneros';
+import React, { useState } from "react";
+import axios from "axios";
+import LibroCard from "../components/LibroCard";
+import SidebarGeneros from "../components/SidebarGeneros";
+import "../assets/css/buscador.css";
 
 const BuscadorLibros = () => {
-    const [libros, setLibros] = useState([]);
-    const [textoBusqueda, setTextoBusqueda] = useState('');
+  // --- ESTADOS ---
+  const [libros, setLibros] = useState([]);
+  const [textoBusqueda, setTextoBusqueda] = useState("");
+  // Controla cuántos libros son visibles (6 libros = 2-3 líneas aprox)
+  const [visible, setVisible] = useState(6);
 
-    const ejecutarBusqueda = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.get(`http://localhost:8080/api/libros/buscar?q=${textoBusqueda}`);
-            setLibros(response.data);
-        } catch (error) {
-            console.error("Error al buscar:", error);
-        }
-    };
+  // --- LÓGICA DE BÚSQUEDA ---
+  const ejecutarBusqueda = async (e) => {
+    e.preventDefault();
+    
+    // Evita búsquedas vacías
+    if (!textoBusqueda.trim()) return;
 
-    const tusGeneros = ["Ficción", "Misterio", "Ciencia Ficción", "Romance"];
-    const todosLosGeneros = ["Arte", "Autoayuda", "Biografía", "Ciencia ficción", "Clásicos", "Crimen", "Fantasía", "Historia", "Comedia", "Infantil", "Misterio", "Novela", "Paranormal", "Poesía", "Romance", "Suspense", "Terror", "Thriller"];
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/libros/buscar?q=${textoBusqueda.trim()}`,
+      );
+      setLibros(response.data);
+      // Reiniciamos a 6 visibles cuando se hace una nueva búsqueda
+      setVisible(6); 
+    } catch (error) {
+      console.error("Error al buscar:", error);
+    }
+  };
 
-    return (
-        <div style={estiloPagina}>
-            <SidebarGeneros tusGeneros={tusGeneros} todosLosGeneros={todosLosGeneros} />
+  // --- LÓGICA DE CARGA ---
+  const mostrarMasLibros = () => {
+    // Aumentamos de 6 en 6 (puedes cambiarlo a 9 si prefieres 3 líneas)
+    setVisible((prevValue) => prevValue + 6);
+  };
 
-            <main style={{ flex: 1 }}>
-                <div style={estiloContenedorBuscador}>
-                    <form onSubmit={ejecutarBusqueda} style={estiloForm}>
-                        <div style={estiloIcono}>🔍</div>
-                        <input 
-                            type="text" 
-                            placeholder="Busca por título, autor o género..." 
-                            value={textoBusqueda}
-                            onChange={(e) => setTextoBusqueda(e.target.value)}
-                            style={estiloInput}
-                        />
-                        <button 
-                            type="submit" 
-                            style={estiloBoton}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#b57668'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#C88B7D'}
-                        >
-                            Buscar
-                        </button>
-                    </form>
+  const tusGeneros = ["Ficción", "Misterio", "Ciencia Ficción", "Romance"];
+  const todosLosGeneros = ["Arte", "Autoayuda", "Biografía", "Ciencia ficción", "Clásicos", "Crimen", "Fantasía", "Historia", "Comedia", "Infantil", "Misterio", "Novela", "Paranormal", "Poesía", "Romance", "Suspense", "Terror", "Thriller"];
+
+  return (
+    <div className="buscador-page">
+      <div className="container-custom">
+        <div className="row">
+          
+          {/* Sidebar lateral */}
+          <aside className="col-md-3">
+            <SidebarGeneros
+              tusGeneros={tusGeneros}
+              todosLosGeneros={todosLosGeneros}
+            />
+          </aside>
+
+          {/* Contenido principal */}
+          <main className="col-md-9">
+            
+            {/* Barra de búsqueda */}
+            <div className="search-bar">
+              <form className="search-bar__form" onSubmit={ejecutarBusqueda}>
+                <div className="search-bar__icon">
+                  <i className="bi bi-search"></i>
                 </div>
+                <input
+                  type="text"
+                  className="search-bar__input"
+                  placeholder="Busca por título, autor o género..."
+                  value={textoBusqueda}
+                  onChange={(e) => setTextoBusqueda(e.target.value)}
+                  autoFocus
+                />
+                <button type="submit" className="search-bar__button">
+                  Buscar
+                </button>
+              </form>
+            </div>
 
-                <div style={{textAlign: 'right', marginBottom: '20px'}}>
-                    <span style={{color: '#666', marginRight: '10px'}}>Ordenar por:</span>
-                    <select style={estiloSelect}><option>Valoración</option><option>Título</option></select>
-                </div>
+            {/* Filtro de ordenación */}
+            <div className="sort-section">
+              <span className="me-2">Ordenar por:</span>
+              <select className="sort-section__select">
+                <option>Valoración</option>
+                <option>Título</option>
+              </select>
+            </div>
 
-                <div style={estiloGrid}>
-                    {libros.length > 0 ? (
-                        libros.map((libro, index) => <LibroCard key={index} libro={libro} />)
-                    ) : (
-                        <p style={{textAlign: 'center', gridColumn: '1/-1', color: '#666', marginTop: '50px'}}>Usa el buscador para encontrar tus libros favoritos.</p>
-                    )}
-                </div>
-            </main>
+            {/* Grid de resultados con límite 'visible' */}
+            <div className="libros-grid">
+              {libros.length > 0 ? (
+                /* .slice(0, visible) corta el array para mostrar solo los permitidos */
+                libros.slice(0, visible).map((libro, index) => (
+                  <LibroCard key={index} libro={libro} />
+                ))
+              ) : (
+                <p className="libros-grid__mensaje">
+                  Usa el buscador para encontrar tus libros favoritos.
+                </p>
+              )}
+            </div>
+
+            {/* Botón Ver Más: Solo se muestra si hay más libros en el array que los visibles */}
+            {libros.length > visible && (
+              <div className="ver-mas-container">
+                <button onClick={mostrarMasLibros} className="btn-ver-mas">
+                  Ver más libros
+                </button>
+              </div>
+            )}
+          </main>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
-
-const estiloPagina = { display: 'flex', padding: '40px', gap: '30px', backgroundColor: '#E0F9EE', minHeight: '100vh', fontFamily: 'sans-serif' };
-const estiloContenedorBuscador = { backgroundColor: '#A8CBBF', padding: '15px 40px', borderRadius: '50px', marginBottom: '30px', display: 'flex', justifyContent: 'center' };
-const estiloForm = { display: 'flex', width: '100%', maxWidth: '650px', backgroundColor: 'white', borderRadius: '30px', overflow: 'hidden' };
-const estiloIcono = { padding: '0 15px', display: 'flex', alignItems: 'center', color: '#888' };
-const estiloInput = { flex: 1, border: 'none', padding: '12px 10px', fontSize: '1rem', outline: 'none' };
-const estiloBoton = { backgroundColor: '#C88B7D', color: 'white', border: 'none', padding: '0 30px', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' };
-const estiloSelect = { padding: '5px 10px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: 'white' };
-const estiloGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '25px' };
 
 export default BuscadorLibros;

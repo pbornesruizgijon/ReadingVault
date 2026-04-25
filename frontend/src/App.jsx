@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "./App.css";
 
 // Importación de componentes
-import Navbar from "./components/Navbar";
+import Header from "./components/Header";
 import Footer from "./components/Footer";
 
 // Importación de páginas
@@ -14,24 +16,25 @@ import BuscadorLibros from "./pages/BuscadorLibros";
 function App() {
   return (
     <Router>
-      {/* El Navbar aparece en todas las rutas */}
-      <Navbar />
-      
+      <Header />
+
+      {/* No ponemos el container aquí porque si no, 
+          el fondo azul del Hero de la Landing se cortará.
+      */}
       <main className="main-content">
         <Routes>
-          {/* Ruta principal: Landing modular */}
           <Route path="/" element={<Landing />} />
 
-          {/* Rutas de autenticación */}
+          {/* Para Login, Registro y Buscador, que SÍ son 100% 
+             contenido centrado, lo ideal es que el container 
+             esté dentro de cada página.
+          */}
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
-          
-          {/* Buscador dinámico de Google Books */}
           <Route path="/buscador" element={<BuscadorLibros />} />
         </Routes>
       </main>
 
-      {/* El Footer aparece al final de todas las rutas */}
       <Footer />
     </Router>
   );
