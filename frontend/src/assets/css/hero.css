@@ -3,55 +3,51 @@
 .hero {
     display: flex;
     align-items: center;
-    /* Reducimos la altura mínima para que no sea tan gigante */
     min-height: 60vh; 
     width: 100%;
     background-color: var(--color-azul-claro);
     overflow: hidden;
     position: relative;
-    /* Reducimos el padding superior e inferior */
-    padding: 20px 0; 
+    padding: 20px 0;
 }
 
-/* --- CONTENEDOR DEL TEXTO --- */
-.hero__content {
-    display: flex;
-    justify-content: center; 
-    z-index: 10;
-}
-
+/* --- BLOQUE DE TEXTO --- */
 .hero__texto-bloque {
     max-width: 550px;
-    text-align: center;
+    text-align: left;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    z-index: 10;
+    position: relative;
 }
 
-/* --- AJUSTE DE TAMAÑOS --- */
 .hero__titulo {
     font-family: var(--font-titulos);
-    /* Bajamos un poco el tamaño para que sea más compacto */
-    font-size: 4rem; 
-    color: var(--color-marron-oscuro);
+    font-size: 4.5rem; 
     margin: 0;
     line-height: 1;
+}
+
+.hero__titulo--verde {
+    color: var(--color-verde-oscuro);
+    display: block;
 }
 
 .hero__titulo--amarillo {
     color: var(--color-amarillo);
     display: block;
-    margin-top: 2px;
+    margin-top: 5px;
 }
 
 .hero__slogan {
     font-family: var(--font-body);
-    font-size: 1.15rem; /* Un poco más pequeño */
+    font-size: 1.2rem;
     color: var(--text-body);
-    max-width: 420px;
-    /* Reducimos márgenes entre elementos */
-    margin: 20px 0; 
+    max-width: 450px;
+    margin: 25px 0;
     font-weight: 400;
+    line-height: 1.4;
 }
 
 /* --- BOTÓN --- */
@@ -60,34 +56,51 @@
     background-color: var(--color-salmon);
     color: white;
     text-decoration: none;
-    padding: 14px 45px; /* Botón un poco más fino */
+    padding: 15px 50px;
     border-radius: 50px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1.2px;
     transition: all 0.3s ease;
+    box-shadow: var(--shadow);
 }
 
 .hero__boton:hover {
-    background-color: var(--color-verde-oscuro);
-    transform: translateY(-2px);
+    background-color: var(--color-amarillo);
+    color: var(--color-marron-oscuro);
+    transform: translateY(-3px);
 }
 
-/* --- IMAGEN DECORATIVA --- */
+/* --- IMAGEN CON CLIP-PATH --- */
 .hero__img-wrap {
     position: absolute;
     top: 0;
     right: 0;
-    width: 50%; /* Ajustamos el ancho */
+    width: 55%; 
     height: 100%;
     z-index: 1;
-    
-    /* Mantenemos el clip-path curvo */
-    clip-path: ellipse(80% 100% at 90% 50%);
+    clip-path: ellipse(80% 100% at 95% 50%);
+    opacity: 1;
+    filter: brightness(0.6);
 }
 
 .hero__img-element {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* Responsivo para tablets/móviles */
+@media (max-width: 768px) {
+    .hero__texto-bloque {
+        text-align: center;
+        align-items: center;
+        max-width: 100%;
+    }
+    .hero__titulo {
+        font-size: 3rem;
+    }
+    .hero__img-wrap {
+        display: none; /* Ocultamos la imagen en móvil para que el texto sea legible */
+    }
 }
