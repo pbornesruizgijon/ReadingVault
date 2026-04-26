@@ -67,7 +67,7 @@
 
 .hero__boton:hover {
     background-color: var(--color-amarillo);
-    color: var(--color-marron-oscuro);
+    color: var(--color-verde-oscuro);
     transform: translateY(-3px);
 }
 

@@ -97,7 +97,7 @@
 .card__titulo {
     font-family: var(--font-titulos);
     font-size: 1.6rem;
-    color: var(--color-marron-oscuro);
+    color: var(--color-verde-oscuro);
     margin-bottom: 15px;
 }
 
@@ -105,7 +105,7 @@
     font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.6;
-    color: var(--color-marron-medio);
+    color: var(--color-verde-medio);
 }
 
 @media (max-width: 768px) {

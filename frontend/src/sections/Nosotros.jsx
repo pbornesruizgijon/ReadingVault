@@ -7,9 +7,8 @@ export default function Nosotros() {
   const olaRef = useRef(null);
 
   useEffect(() => {
-    // Animación sutil para que las olas parezcan vivas
     gsap.to(".ola-path", {
-      x: 20,
+      x: 50,
       repeat: -1,
       yoyo: true,
       duration: 3,
