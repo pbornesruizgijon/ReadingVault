@@ -1,0 +1,59 @@
+/* Contenedor del formulario con el color de fondo de la maqueta */
+.ajustes-form-container {
+    background-color: var(--color-azul-footer);
+    color: var(--color-marron-oscuro);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+}
+
+/* Estilo para los labels de los inputs */
+.label-ajustes {
+    font-weight: 700;
+    font-family: var(--font-body);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Personalización de los inputs para que no desentonen */
+.ajustes-form-container .form-control {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 0.6rem;
+}
+
+.ajustes-form-container .form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.25rem rgba(194, 132, 122, 0.25);
+}
+
+/* Para que los selects no se estiren demasiado */
+.ajustes-form-container .form-select-sm {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    padding-left: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* Título de la columna derecha más pequeño si es necesario */
+.sidebar-titulo-ajustes {
+    font-family: var(--font-titulos);
+    font-weight: 700;
+    color: var(--color-marron-oscuro);
+}
+
+/* Columna derecha y zona de peligro */
+.zona-peligro {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    width: 100%;
+}
+
+.sidebar-titulo-ajustes {
+    font-family: var(--font-titulos);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-titulos);
+}

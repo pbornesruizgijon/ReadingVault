@@ -15,9 +15,9 @@ import lombok.Data;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUsuario;
-    
+
     private String nombre;
     private String apellidos;
     private String fechaNacimiento;
@@ -27,11 +27,15 @@ public class Usuario {
     private String rol = "USER";
     private String fechaRegistro;
     private String fotoPerfil;
-    private String localidad;   
+    private String localidad;
     private String biografia;
     private LocalDateTime ultimaConexion;
+    private String privacidadPerfil = "Público";
+    private String privacidadLibros = "Público";
+    private String privacidadAmigos = "Público";
+    private String privacidadDatos = "Privado";
 
-    @ManyToOne 
+    @ManyToOne
     @JoinColumn(name = "id_genero")
     private Genero genero;
 }

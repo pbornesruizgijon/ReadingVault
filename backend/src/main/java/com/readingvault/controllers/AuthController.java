@@ -43,13 +43,11 @@ public class AuthController {
         String identifier = loginRequest.get("usernameOrEmail");
         String password = loginRequest.get("password");
 
-        // Si por casualidad el identifier llega nulo, probamos con "email"
         if (identifier == null) {
             identifier = loginRequest.get("email");
         }
 
         try {
-            // Usamos el identificador (que puede ser email o usuario)
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(identifier, password));
         } catch (Exception e) {
@@ -57,37 +55,54 @@ public class AuthController {
                     .body("Error: Credenciales incorrectas");
         }
 
-        // Generamos el token usando el mismo identificador
+        // Generamos el token
         final UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
         final String token = jwtUtil.generateToken(userDetails.getUsername());
 
-        // Buscamos al user en la bbdd
-        // Usuario usuario = usuarioService.buscarPorEmail(identifier)
-        // .orElseGet(() -> usuarioService.buscarPorId(null) // Esto es solo un ejemplo,
-        // mejor busca por nombreUsuario si no es email
-        // .orElse(null));
+        // Buscamos al usuario en la DB
         Usuario userDb = usuarioService.buscarPorEmail(userDetails.getUsername())
-                .orElse(null);
+                .orElseGet(() -> usuarioService.buscarPorNombreUsuario(userDetails.getUsername()).orElse(null));
 
+        if (userDb == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+
+        // 1. ACTUALIZAR CONEXIÓN (Sin encriptar de nuevo la pass)
+        userDb.setUltimaConexion(LocalDateTime.now());
+        usuarioService.guardarSinEncriptar(userDb); 
+
+        // 2. CONSTRUIR RESPUESTA SEGURA (Sin password)
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-
-        if (userDb != null) {
-            userDb.setPassword(null);
-            response.put("user", userDb);
-        }
-        userDb.setUltimaConexion(LocalDateTime.now());
-         // Guardamos la fecha actual
-        usuarioService.registrarUsuario(userDb);
+        
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("idUsuario", userDb.getIdUsuario());
+        userData.put("nombreUsuario", userDb.getNombreUsuario());
+        userData.put("email", userDb.getEmail());
+        userData.put("fotoPerfil", userDb.getFotoPerfil());
+        userData.put("rol", userDb.getRol());
+        // Añadimos estos para que el perfil no salga vacío al loguear
+        userData.put("localidad", userDb.getLocalidad());
+        userData.put("biografia", userDb.getBiografia());
+        
+        response.put("user", userData); 
+        
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/registro")
     public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+        // Validación de email
         if (usuarioService.buscarPorEmail(usuario.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Error: El email ya está registrado");
         }
+        // Validación de nombre de usuario
+        if (usuarioService.buscarPorNombreUsuario(usuario.getNombreUsuario()).isPresent()){
+            return ResponseEntity.badRequest().body("Error: El nombre de usuario ya existe");
+        }
+
+        // El método registrarUsuario debe encargarse de encriptar la pass
         Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-        return ResponseEntity.ok("Usuario registrado con éxito: " + nuevoUsuario.getEmail());
+        return ResponseEntity.ok("Usuario registrado con éxito: " + nuevoUsuario.getNombreUsuario());
     }
 }

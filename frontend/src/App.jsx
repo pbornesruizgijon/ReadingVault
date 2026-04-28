@@ -21,6 +21,7 @@ import Registro from "./pages/Registro";
 import BuscadorLibros from "./pages/BuscadorLibros";
 import Home from './pages/Home';
 import PerfilUsuario from "./pages/PerfilUsuario";
+import AjustesCuenta from "./pages/AjustesCuenta";
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
           <Route path="/buscador" element={<BuscadorLibros />} />
           <Route path="/home" element={<Home />} />
           <Route path="/perfilUsuario" element={<PerfilUsuario />} />
+          <Route path="/ajustesCuenta" element={<AjustesCuenta />} />
         </Routes>
       </main>
 
