@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../assets/css/header.css";
 
 /**
@@ -6,6 +6,21 @@ import "../assets/css/header.css";
  * Utiliza variables globales para colores y tipografía.
  */
 export default function Header() {
+  const navigate = useNavigate();
+  
+  // Comprobamos si hay un usuario en el localStorage
+  const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
+  const estaLogueado = !!usuarioSesion; // true si existe, false si no
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    localStorage.clear(); // Borra token y usuario
+    navigate("/login");    // Redirige al login
+    window.location.reload(); // Forzamos recarga para limpiar estados globales
+  };
+
+  const FOTO_DEFAULT = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
   return (
     <nav className="navbar-custom">
       <div className="container d-flex justify-content-between align-items-center">
@@ -38,12 +53,35 @@ export default function Header() {
 
           <div className="navbar-custom__divider"></div>
 
-          <Link to="/registro" className="navbar-custom__link">
-            Registro
-          </Link>
-          <Link to="/login" className="navbar-custom__auth-btn">
-            Log In
-          </Link>
+          {/* LÓGICA CONDICIONAL: SI NO ESTÁ LOGUEADO */}
+          {!estaLogueado ? (
+            <>
+              <Link to="/registro" className="navbar-custom__link">Registro</Link>
+              <Link to="/login" className="navbar-custom__auth-btn">Log In</Link>
+            </>
+          ) : (
+            /* LÓGICA CONDICIONAL: SI ESTÁ LOGUEADO */
+            <div className="d-flex align-items-center gap-3">
+              {/* Link al Perfil con su foto pequeña */}
+              <Link to="/perfilUsuario" className="navbar-custom__link d-flex align-items-center gap-2">
+                <img 
+                  src={usuarioSesion.fotoPerfil || FOTO_DEFAULT} 
+                  alt="Mi perfil" 
+                  style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} 
+                />
+                Mi perfil
+              </Link>
+
+              {/* Botón de Log Out */}
+              <button 
+                onClick={handleLogout} 
+                className="navbar-custom__auth-btn"
+                
+              >
+                Log Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>
