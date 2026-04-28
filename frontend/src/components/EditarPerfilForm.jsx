@@ -4,23 +4,25 @@ import "../assets/css/ajustes.css";
 
 export default function EditarPerfilForm({ user }) {
   const fileInputRef = useRef(null);
-  const [formData, setFormData] = useState({
-    nombre: "",
-    apellidos: "",
-    fechaNacimiento: "",
-    localidad: "",
-    biografia: "",
-    nombreUsuario: "",
-    email: "",
-    password: "",
-  });
+  const editorRef = useRef(null);
 
-  // --- 2. ESTADOS PARA EL RECORTE ---
+  // --- ESTADOS ---
+  const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+  const [cargandoSubida, setCargandoSubida] = useState(false);
   const [imagenOriginal, setImagenOriginal] = useState(null);
   const [zoom, setZoom] = useState(1.2);
-  const editorRef = useRef(null);
-  // Estado para la previsualización local antes de recargar la página
   const [fotoPrevisualizacion, setFotoPrevisualizacion] = useState(null);
+
+  const [formData, setFormData] = useState({
+    nombre: "", apellidos: "", fechaNacimiento: "", localidad: "",
+    biografia: "", nombreUsuario: "", email: "", password: "",
+  });
+
+  // Notificación tipo Toast
+  const mostrarNotificacion = (texto, tipo) => {
+    setMensaje({ texto, tipo });
+    setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3500);
+  };
 
   useEffect(() => {
     if (user) {
@@ -34,7 +36,6 @@ export default function EditarPerfilForm({ user }) {
         email: user.email || "",
         password: "",
       });
-      // Inicializar la foto con la que viene de la base de datos
       setFotoPrevisualizacion(user.fotoPerfil);
     }
   }, [user]);
@@ -43,151 +44,109 @@ export default function EditarPerfilForm({ user }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- 3. MODIFICAR: Función para capturar foto, NO SUBIRLA AÚN ---
+  // --- GESTIÓN DE FOTO ---
   const handleFotoChange = (e) => {
     const archivo = e.target.files[0];
     if (!archivo) return;
-
-    // Validar que sean solo imágenes
     if (!archivo.type.startsWith("image/")) {
-      alert("Por favor, selecciona una imagen válida (jpg, png).");
+      mostrarNotificacion("Por favor, selecciona una imagen válida", "error");
       return;
     }
-
-    // EN LUGAR DE SUBIR, ABRIMOS EL EDITOR
     setImagenOriginal(archivo);
-    // Limpiamos el input file para que se pueda volver a seleccionar la misma imagen
     e.target.value = ""; 
   };
 
-  // --- 4. NUEVA FUNCIÓN: PROCESAR RECORTE Y SUBIR A BACKEND ---
   const handleGuardarRecorte = async () => {
     if (editorRef.current) {
-      // 1. Obtener el recorte del lienzo (Canvas)
+      setCargandoSubida(true);
       const canvas = editorRef.current.getImageScaledToCanvas();
 
-      // 2. Convertir el lienzo a un Blob JPEG comprimido (ligero para Cloudinary)
       canvas.toBlob(async (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          setCargandoSubida(false);
+          return;
+        }
 
         const token = localStorage.getItem("token");
-
-        // 3. Reutilizamos tu lógica de FormData existente
         const formDataFoto = new FormData();
-        // Importante: 'blob' sustituye al 'archivo' original, 'perfil.jpg' es el nombre
         formDataFoto.append("foto", blob, "perfil.jpg"); 
 
         try {
-          // Reutilizamos tu llamada fetch actual
           const response = await fetch(
             `http://localhost:8080/api/usuarios/${user.idUsuario}/actualizar-foto`,
             {
               method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
               body: formDataFoto,
             }
           );
 
           if (response.ok) {
             const data = await response.json();
-
-            // Actualizar el LocalStorage (tu lógica actual)
             const userSesion = JSON.parse(localStorage.getItem("usuario"));
             userSesion.fotoPerfil = data.fotoPerfil;
             localStorage.setItem("usuario", JSON.stringify(userSesion));
 
-            // Actualizar previsualización local y cerrar editor
             setFotoPrevisualizacion(data.fotoPerfil);
-            setImagenOriginal(null); // Oculta el modal
-            setZoom(1.2); // Resetea zoom
-
-            alert("¡Foto de perfil actualizada!");
-
-            // Recargar para ver los cambios en todas partes (tu lógica actual)
-            // window.location.reload(); 
-            // ^--- Opcional: Si actualizas fotoPrevisualizacion, no necesitas reload inmediato
+            setImagenOriginal(null);
+            mostrarNotificacion("¡Foto de perfil actualizada con éxito!", "success");
           } else {
-            alert("Error al subir la foto.");
+            mostrarNotificacion("Error al subir la foto al servidor", "error");
           }
         } catch (error) {
-          console.error("Error de red:", error);
+          mostrarNotificacion("Error de conexión con el servidor", "error");
+        } finally {
+          setCargandoSubida(false);
         }
-      }, "image/jpeg", 0.8); // Comprimimos al 80% de calidad
+      }, "image/jpeg", 0.8);
     }
   };
 
   const handleEliminarFoto = async () => {
-    if (
-      !window.confirm(
-        "¿Estás seguro de que quieres eliminar tu foto de perfil?"
-      )
-    )
-      return;
-
+    if (!window.confirm("¿Estás seguro de que quieres eliminar tu foto de perfil?")) return;
+    
     const token = localStorage.getItem("token");
-
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/usuarios/${user.idUsuario}/eliminar-foto`,
-        {
-          method: "POST", 
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const response = await fetch(`http://localhost:8080/api/usuarios/${user.idUsuario}/eliminar-foto`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
         const data = await response.json();
-
-        // Actualizar el LocalStorage
         const userSesion = JSON.parse(localStorage.getItem("usuario"));
         userSesion.fotoPerfil = data.fotoPerfil;
         localStorage.setItem("usuario", JSON.stringify(userSesion));
-
-        // Actualizar previsualización local
         setFotoPrevisualizacion(data.fotoPerfil);
-        alert("Foto eliminada correctamente");
-        // window.location.reload();
-      } else {
-        alert("No se pudo eliminar la foto.");
+        mostrarNotificacion("Foto de perfil eliminada", "success");
       }
     } catch (error) {
-      console.error("Error de red:", error);
+      mostrarNotificacion("No se pudo eliminar la foto", "error");
     }
   };
 
-  // ... handleSubmit sin cambios ...
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    const idUsuario = user.idUsuario;
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/usuarios/${idUsuario}/actualizar`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`http://localhost:8080/api/usuarios/${user.idUsuario}/actualizar`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
       if (response.ok) {
-        const usuarioActualizado = await response.json();
-        localStorage.setItem("usuario", JSON.stringify(usuarioActualizado));
-        alert("¡Perfil actualizado con éxito!");
-        window.location.href = "/perfilUsuario";
+        const data = await response.json();
+        localStorage.setItem("usuario", JSON.stringify(data));
+        mostrarNotificacion("¡Datos actualizados correctamente!", "success");
       } else {
-        const errorText = await response.text();
-        alert("Error al actualizar: " + errorText);
+        mostrarNotificacion("Error al guardar los cambios", "error");
       }
     } catch (error) {
-      console.error("Error de red:", error);
-      alert("No se pudo conectar con el servidor.");
+      mostrarNotificacion("Error de red al actualizar perfil", "error");
     }
   };
 
@@ -195,12 +154,19 @@ export default function EditarPerfilForm({ user }) {
 
   return (
     <>
+      {/* SISTEMA DE NOTIFICACIÓN FLOTANTE */}
+      {mensaje.texto && (
+        <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
+          {mensaje.tipo === "success" ? <i className="bi bi-check-circle-fill me-2"></i> : <i className="bi bi-exclamation-triangle-fill me-2"></i>}
+          {mensaje.texto}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="row g-4">
-        {/* COLUMNA IZQUIERDA (Sin cambios) */}
+        {/* COLUMNA IZQUIERDA: DATOS */}
         <div className="col-lg-8">
           <div className="ajustes-form-container">
             <h4 className="mb-4 fw-bold">Datos Personales</h4>
-
             <div className="row g-3">
               <div className="col-md-6">
                 <label className="label-ajustes">Nombre</label>
@@ -239,98 +205,42 @@ export default function EditarPerfilForm({ user }) {
             </div>
 
             <div className="text-center mt-5">
-              <button type="submit" className="btn-vault px-5 py-2 shadow">
-                Guardar cambios
-              </button>
+              <button type="submit" className="btn-vault px-5 py-2 shadow">Guardar cambios</button>
             </div>
           </div>
         </div>
 
-        {/* COLUMNA DERECHA (Cambio en img src) */}
+        {/* COLUMNA DERECHA: FOTO */}
         <div className="col-lg-4 text-center">
           <div className="perfil-card p-4 h-100 d-flex flex-column align-items-center">
             <h5 className="sidebar-titulo-ajustes">Foto de Perfil</h5>
-
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFotoChange}
-              accept="image/*"
-            />
-            <img
-              // Usamos el estado de previsualización local
-              src={fotoPrevisualizacion || FOTO_DEFAULT}
-              className="foto-perfil-circulo mb-3"
-              alt="Perfil"
-              // Usamos objectFit para que no se deforme la preview
-              style={{ objectFit: 'cover' }} 
-            />
-
+            <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFotoChange} accept="image/*" />
+            <img src={fotoPrevisualizacion || FOTO_DEFAULT} className="foto-perfil-circulo mb-3" alt="Perfil" style={{ objectFit: 'cover', width: '150px', height: '150px', borderRadius: '50%' }} />
             <div className="d-grid gap-2 w-100">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => fileInputRef.current.click()}
-              >
-                Cambiar Foto
-              </button>
-              <button type="button" className="btn btn-sm btn-outline-danger" onClick={handleEliminarFoto}>
-                Eliminar Foto
-              </button>
+              <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => fileInputRef.current.click()}>Cambiar Foto</button>
+              <button type="button" className="btn btn-sm btn-outline-danger" onClick={handleEliminarFoto}>Eliminar Foto</button>
             </div>
           </div>
         </div>
       </form>
 
-      {/* --- MODAL DE RECORTE --- */}
+      {/* MODAL DE RECORTE */}
       {imagenOriginal && (
         <div className="crop-modal-overlay">
-          <div className="crop-modal-content text-center">
+          <div className="crop-modal-content">
             <h4 className="mb-2">Ajusta tu foto</h4>
-            <p className="text-muted mb-3">Arrastra la imagen para encuadrar tu perfil.</p>
-            
-            <div className="editor-wrapper d-inline-block border bg-light">
-              <AvatarEditor
-                ref={editorRef}
-                image={imagenOriginal}
-                width={200}
-                height={200}
-                border={50}
-                borderRadius={100}
-                scale={zoom}
-                rotate={0}
-              />
+            <div className="editor-wrapper d-inline-block border bg-light mb-3">
+              <AvatarEditor ref={editorRef} image={imagenOriginal} width={200} height={200} border={50} borderRadius={100} scale={zoom} rotate={0} />
             </div>
-
-            {/* Control de Zoom */}
-            <div className="zoom-control mt-3 d-flex align-items-center justify-content-center gap-2">
+            <div className="zoom-control d-flex align-items-center justify-content-center gap-2">
               <i className="bi bi-zoom-out"></i>
-              <input
-                type="range"
-                min="1"
-                max="3"
-                step="0.01"
-                value={zoom}
-                onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="form-range"
-                style={{ maxWidth: '200px' }}
-              />
+              <input type="range" min="1" max="3" step="0.01" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} style={{ width: '200px' }} />
               <i className="bi bi-zoom-in"></i>
             </div>
-
-            <div className="action-buttons mt-4 gap-2 d-flex justify-content-center">
-              <button 
-                onClick={() => setImagenOriginal(null)} // Cancela y cierra
-                className="btn btn-outline-secondary"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={handleGuardarRecorte} // Procesa, comprime y sube
-                className="btn btn-primary"
-              >
-                Aplicar y Subir
+            <div className="mt-4 gap-2 d-flex justify-content-center">
+              <button onClick={() => setImagenOriginal(null)} className="btn btn-outline-secondary" disabled={cargandoSubida}>Cancelar</button>
+              <button onClick={handleGuardarRecorte} className="btn btn-primary" disabled={cargandoSubida}>
+                {cargandoSubida ? "Subiendo..." : "Aplicar y Subir"}
               </button>
             </div>
           </div>

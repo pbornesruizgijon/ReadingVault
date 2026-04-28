@@ -58,32 +58,47 @@
     color: var(--text-titulos);
 }
 
-/* =========================================
-   ESTILOS PARA EL MODAL DE RECORTE (AVATAR EDITOR)
-   ========================================= */
+.vault-toast {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    padding: 15px 25px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    z-index: 100000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    animation: slideInVault 0.4s ease-out;
+}
 
-/* 1. El fondo oscuro que cubre toda la pantalla */
+.vault-toast--success {
+    background-color: var(--color-verde-oscuro);
+}
+
+.vault-toast--error {
+    background-color: var(--color-rojo-vino);
+}
+
+@keyframes slideInVault {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+   /* ESTILOS PARA EL MODAL DE RECORTE DE AVATAR */
+
 .crop-modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw; /* Todo el ancho de la ventana */
-    height: 100vh; /* Todo el alto de la ventana */
-    background-color: rgba(0, 0, 0, 0.75); /* Negro semi-transparente */
-    
-    /* Centrado absoluto del contenido */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    /* Capa superior a todo (Header, Footer, etc.) */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: auto;
+    background-color: transparent; 
+    backdrop-filter: none; 
     z-index: 99999; 
-    
-    /* Efecto de desenfoque en el fondo para estilizar */
-    backdrop-filter: blur(4px); 
-    
-    /* Animación de entrada suave */
-    animation: fadeInModal 0.3s ease-out;
+    animation: fadeInModal 0.2s ease-out;
 }
 
 /* La tarjeta blanca centrada que contiene el editor */
