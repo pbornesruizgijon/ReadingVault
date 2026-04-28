@@ -1,96 +1,152 @@
 import React, { useState } from 'react';
 import AuthService from '../services/Auth.service';
+import '../assets/css/registro.css'; 
 
 const Registro = () => {
-    // 1. Aquí guardamos lo que el usuario escribe
+    // Estado inicial
     const [formData, setFormData] = useState({
-        nombre: '',
-        apellidos: '',
-        fechaNacimiento: '',
-        nombreUsuario: '',
-        email: '',
-        password: '',
-        repetirPassword: ''
+        nombre: '', apellidos: '', fechaNacimiento: '',
+        nombreUsuario: '', email: '', password: '', repetirPassword: ''
     });
+    
+    // Estado de errores
+    const [errorMessage, setErrorMessage] = useState(''); 
 
-    // 2. Esta función se activa cada vez que escribes en un input
+    // Actualiza inputs y limpia errores
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        setErrorMessage(''); 
     };
 
-    // 3. Esta función se activa al pulsar el botón "Registrarse"
+    // Validaciones en tiempo real
+    const reqLength = formData.password.length >= 8;
+    const reqUpper = /[A-Z]/.test(formData.password);
+    const reqNum = /\d/.test(formData.password);
+
+    // Valida y envía
     const handleRegister = async (e) => {
-        e.preventDefault(); // Evita que la página se recargue
+        e.preventDefault(); 
+
+        // Regex
+        const nameRegex = /^[a-zA-ZÀ-ÿ\s]{2,40}$/; 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+
+        // Validaciones
+        if (!nameRegex.test(formData.nombre) || !nameRegex.test(formData.apellidos)) {
+            setErrorMessage("Nombre y apellidos deben contener al menos 2 letras y sin números.");
+            return;
+        }
+        
+        if (!formData.fechaNacimiento) {
+            setErrorMessage("Debes introducir una fecha de nacimiento.");
+            return;
+        }
+
+        if (formData.nombreUsuario.trim().length < 4) {
+            setErrorMessage("El nombre de usuario debe tener al menos 4 caracteres.");
+            return;
+        }
+
+        if (!emailRegex.test(formData.email)) {
+            setErrorMessage("Introduce un correo electrónico válido.");
+            return;
+        }
+
+        // Bloqueo por contraseña inválida
+        if (!reqLength || !reqUpper || !reqNum) {
+            setErrorMessage("La contraseña no cumple todos los requisitos.");
+            return;
+        }
 
         if (formData.password !== formData.repetirPassword) {
-            alert("Las contraseñas no coinciden");
+            setErrorMessage("Las contraseñas no coinciden.");
             return;
         }
 
         try {
-            // Enviamos los datos a tu Backend de Java
+            // Envío
             await AuthService.register(formData);
-            alert("¡Usuario guardado en MySQL con éxito!");
+            window.location.href = "/login"; 
         } catch (error) {
-            alert("Error al conectar con el servidor");
+            setErrorMessage("Error al conectar con el servidor.");
         }
     };
 
     return (
-        <div style={{ backgroundColor: '#D1F7E8', padding: '50px', minHeight: '100vh' }}>
-            {/* Contenedor del formulario (el cuadro verde oscuro de tu imagen) */}
-            <div style={{ backgroundColor: '#89A894', padding: '30px', borderRadius: '15px', maxWidth: '600px', margin: '0 auto' }}>
-                <h2 style={{ textAlign: 'center', color: 'white' }}>Registro</h2>
+        <div className="registro-page">
+            <div className="registro-panel">
+                <div className="registro-logo-container">
+                    <img src="/img/logo-vault.png" alt="Logo Reading Vault" className="registro-logo" />
+                </div>
                 
-                <form onSubmit={handleRegister}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                        {/* INPUT NOMBRE */}
-                        <div>
-                            <label>Nombre</label>
-                            <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} style={inputStyle} />
+                <form onSubmit={handleRegister} className="registro-form">
+                    <div className="registro-grid">
+                        <div className="registro-form-group">
+                            <label className="registro-label">Nombre</label>
+                            <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="registro-input" required />
                         </div>
-                        {/* INPUT APELLIDOS */}
-                        <div>
-                            <label>Apellidos</label>
-                            <input type="text" name="apellidos" value={formData.apellidos} onChange={handleChange} style={inputStyle} />
+                        
+                        <div className="registro-form-group">
+                            <label className="registro-label">Apellidos</label>
+                            <input type="text" name="apellidos" value={formData.apellidos} onChange={handleChange} className="registro-input" required />
                         </div>
-                        {/* FECHA NACIMIENTO */}
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label>Fecha de nacimiento</label>
-                            <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} style={inputStyle} />
+
+                        <div className="registro-form-group">
+                            <label className="registro-label">Fecha de nacimiento</label>
+                            <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} className="registro-input" required />
                         </div>
-                        {/* NOMBRE USUARIO */}
-                        <div>
-                            <label>Nombre de usuario</label>
-                            <input type="text" name="nombreUsuario" value={formData.nombreUsuario} onChange={handleChange} style={inputStyle} />
+                        
+                        {/* Celda vacía */}
+                        <div className="registro-form-group hidden-mobile"></div>
+
+                        <div className="registro-form-group">
+                            <label className="registro-label">Nombre de usuario</label>
+                            <input type="text" name="nombreUsuario" value={formData.nombreUsuario} onChange={handleChange} className="registro-input" required />
                         </div>
-                        {/* EMAIL */}
-                        <div>
-                            <label>Correo electrónico</label>
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} style={inputStyle} />
+
+                        <div className="registro-form-group">
+                            <label className="registro-label">Correo electrónico</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} className="registro-input" required />
                         </div>
-                        {/* PASSWORD */}
-                        <div>
-                            <label>Contraseña</label>
-                            <input type="password" name="password" value={formData.password} onChange={handleChange} style={inputStyle} />
+
+                       {/* Input password con UI dinámica */}
+                        <div className="registro-form-group">
+                            <label className="registro-label">Contraseña</label>
+                            <input type="password" name="password" value={formData.password} onChange={handleChange} className="registro-input" required />
+                                                    
+                            {formData.password.length > 0 && (
+                            <div className="registro-hints">
+                                <span className={reqLength ? "hint-met" : "hint-unmet"}>
+                                    {reqLength ? "✅" : "❌"} Mínimo 8 caracteres
+                                </span><br></br>
+                                <span className={reqUpper ? "hint-met" : "hint-unmet"}>
+                                    {reqUpper ? "✅" : "❌"} Una letra mayúscula
+                                </span><br></br>
+                                <span className={reqNum ? "hint-met" : "hint-unmet"}>
+                                    {reqNum ? "✅" : "❌"} Un número
+                                </span>
+                            </div>
+                        )}
                         </div>
-                        {/* REPETIR PASSWORD */}
-                        <div>
-                            <label>Repetir contraseña</label>
-                            <input type="password" name="repetirPassword" value={formData.repetirPassword} onChange={handleChange} style={inputStyle} />
+                        <div className="registro-form-group">
+                            <label className="registro-label">Repetir contraseña</label>
+                            <input type="password" name="repetirPassword" value={formData.repetirPassword} onChange={handleChange} className="registro-input" required />
                         </div>
                     </div>
 
-                    <button type="submit" style={buttonStyle}>Registrarse</button>
+                    {/* Alerta de error */}
+                    {errorMessage && (
+                        <div className="registro-error-msg">
+                            {errorMessage}
+                        </div>
+                    )}
+
+                    <button type="submit" className="registro-button">Registrarse</button>
                 </form>
             </div>
         </div>
     );
 };
-
-// Estilos rápidos para que se parezca a tu diseño
-const inputStyle = { width: '100%', padding: '8px', borderRadius: '5px', border: 'none', marginTop: '5px' };
-const buttonStyle = { width: '100%', padding: '12px', backgroundColor: '#C88B7D', color: 'white', border: 'none', borderRadius: '10px', marginTop: '20px', cursor: 'pointer' };
 
 export default Registro;

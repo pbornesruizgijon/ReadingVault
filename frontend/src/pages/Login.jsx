@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import AuthService from '../services/Auth.service';
+import '../assets/css/login.css';
 
 const Login = () => {
-    // 1. Cambiamos 'email' por 'usernameOrEmail' para que sea más descriptivo
     const [credentials, setCredentials] = useState({ usernameOrEmail: '', password: '' });
 
     const handleChange = (e) => {
@@ -13,16 +13,11 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            // 2. Enviamos el valor (sea email o usuario) al backend
             const response = await AuthService.login(credentials.usernameOrEmail, credentials.password);
             
             if (response.data.token) {
                 localStorage.setItem("token", response.data.token);
-                // Guardamos el usuario
                 localStorage.setItem("usuario", JSON.stringify(response.data.user));
-                alert("¡Login exitoso! Bienvenido.");
-
-                // Redirigimos a home
                 window.location.href = "/home";
             }
         } catch (error) {
@@ -31,48 +26,48 @@ const Login = () => {
     };
 
     return (
-        <div style={containerStyle}>
-            <div style={boxStyle}>
-                <h2 style={{color: 'white', marginBottom: '20px'}}>Log In</h2>
-                <form onSubmit={handleLogin}>
-                    {/* 3. Cambiamos type="email" a type="text" para que acepte el username */}
-                    <input 
-                        type="text" 
-                        name="usernameOrEmail" 
-                        placeholder="Email o Nombre de usuario" 
-                        onChange={handleChange} 
-                        style={inputStyle} 
-                        required 
-                    />
-                    <input 
-                        type="password" 
-                        name="password" 
-                        placeholder="Contraseña" 
-                        onChange={handleChange} 
-                        style={inputStyle} 
-                        required 
-                    />
+        <div className="login-page">
+            <div className="login-panel">
+                <div className="login-logo-container">
+                    <img src="/img/logo-vault.png" alt="Logo Reading Vault" className="login-logo" />
+                </div>
+                
+                <form onSubmit={handleLogin} className="login-form">
+                    <div className="login-form-group">
+                        <label className="login-label">Usuario / Correo electrónico</label>
+                        <input 
+                            type="text" 
+                            name="usernameOrEmail" 
+                            placeholder="Usuario / Correo electrónico" 
+                            onChange={handleChange} 
+                            className="login-input"
+                            required 
+                        />
+                    </div>
                     
-                    <button type="submit" style={buttonStyle}>Entrar</button>
+                    <div className="login-form-group">
+                        <label className="login-label">Contraseña</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            placeholder="Contraseña" 
+                            onChange={handleChange} 
+                            className="login-input"
+                            required 
+                        />
+                    </div>
 
-                    {/* 4. Botón de "Olvidé mi contraseña" */}
-                    <div style={forgotPasswordContainer}>
-                        <a href="#" style={forgotPasswordLink} onClick={() => alert("Función de recuperación próximamente...")}>
-                            ¿Olvidaste tu contraseña?
+                    <div className="forgot-password-link">
+                        <a href="#" onClick={() => alert("Próximamente...")}>
+                            Olvidé mi contraseña
                         </a>
                     </div>
+                    
+                    <button type="submit" className="login-button">Iniciar sesión</button>
                 </form>
             </div>
         </div>
     );
 };
-
-// Estilos
-const containerStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#D1F7E8' };
-const boxStyle = { backgroundColor: '#89A894', padding: '40px', borderRadius: '15px', textAlign: 'center', width: '300px' };
-const inputStyle = { display: 'block', width: '100%', margin: '15px 0', padding: '12px', borderRadius: '5px', border: 'none', boxSizing: 'border-box' };
-const buttonStyle = { width: '100%', padding: '12px', backgroundColor: '#C88B7D', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' };
-const forgotPasswordContainer = { marginTop: '15px' };
-const forgotPasswordLink = { color: '#f0f0f0', fontSize: '0.85rem', textDecoration: 'none' };
 
 export default Login;
