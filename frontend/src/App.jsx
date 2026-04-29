@@ -1,17 +1,17 @@
 import React, { useEffect } from "react"; // React y hooks
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from './components/ScrollToTop';
-import BotonSubir from './components/BotonSubir'; // Importamos el botón visual
+import BotonSubir from './components/BotonSubir'; // Botón visual subir
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-// Importación de AOS (Animaciones)
+// Animaciones AOS
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 import "./App.css";
 
-// Componentes globales
+// Globales
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -23,10 +23,10 @@ import BuscadorLibros from "./pages/BuscadorLibros";
 import Home from './pages/Home';
 import PerfilUsuario from "./pages/PerfilUsuario";
 import AjustesCuenta from "./pages/AjustesCuenta";
-
+import DetalleLibro from "./pages/DetalleLibro";
 
 function App() {
-  // Inicializa las animaciones
+  // Inicializa AOS
   useEffect(() => {
     AOS.init({
       duration: 1000, 
@@ -37,7 +37,7 @@ function App() {
 
   return (
     <Router>
-      {/* Resetea el scroll al cambiar de página */}
+      {/* Reseteo de scroll automático */}
       <ScrollToTop />
       
       <Header />
@@ -51,12 +51,13 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/perfilUsuario" element={<PerfilUsuario />} />
           <Route path="/ajustesCuenta" element={<AjustesCuenta />} />
+          <Route path="/detalle" element={<DetalleLibro />} />
         </Routes>
       </main>
 
       <Footer />
 
-      {/* Botón flotante para volver arriba (aparece con scroll) */}
+      {/* Botón flotante */}
       <BotonSubir />
     </Router>
   );

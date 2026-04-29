@@ -1,0 +1,89 @@
+/* --- Fondos divididos --- */
+.detalle-top-bg {
+    background-color: #d6f6e5; /* Menta claro */
+}
+
+.detalle-reviews-bg {
+    background-color: #9ebcb6; /* Salvia oscuro */
+    min-height: 50vh;
+}
+
+/* --- Resto de estilos superiores (mantenidos) --- */
+.detalle-portada { width: 100%; max-width: 260px; border-radius: 12px; object-fit: cover; }
+.detalle-card { background-color: #9ebcb6; border-radius: 20px; color: #4a4a4a; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.detalle-titulo { font-family: var(--font-titulos), serif; font-size: 3rem; color: #3b4543; }
+.detalle-titulo-seccion { font-family: var(--font-titulos), serif; font-size: 2.5rem; color: #4a5754; }
+.detalle-autor { font-size: 1.8rem; font-weight: 300; color: #4a5754; }
+.detalle-stats { font-size: 0.95rem; color: #4a5754; }
+.detalle-texto { font-size: 1.05rem; line-height: 1.5; }
+
+.btn-estado { background-color: #c98b80; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 1.1rem; }
+.btn-estado:hover { background-color: #b37a70; }
+.btn-mas { background: none; border: none; color: #f6c860; font-weight: bold; padding: 0; font-size: 0.95rem; }
+.btn-mas:hover { color: #dfb24e; text-decoration: underline; }
+
+.estrellas { color: #f6c860; font-size: 1.1rem; }
+
+/* --- NUEVA SECCIÓN: Reseñas --- */
+
+/* Tarjeta principal con resplandor blanco */
+.review-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.45); /* Efecto glow blanco de la imagen */
+}
+
+/* Avatar del usuario */
+.review-user {
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+}
+
+/* Caja de texto interior (Menta claro) */
+.review-content {
+    background-color: #d6f6e5;
+    border-radius: 12px;
+    flex-grow: 1;
+}
+
+/* Botón Ver más (Píldora amarilla) */
+.btn-ver-mas {
+    background-color: #f6c860;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-ver-mas:hover {
+    background-color: #dfb24e;
+    transform: translateY(-2px);
+}
+
+/* Responsivo para móviles */
+@media (max-width: 576px) {
+    .review-card {
+        flex-direction: column;
+        align-items: center;
+    }
+    .review-user {
+        margin-bottom: 10px;
+    }
+}
