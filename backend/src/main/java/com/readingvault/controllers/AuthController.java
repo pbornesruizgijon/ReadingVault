@@ -88,18 +88,40 @@ public class AuthController {
     }
 
     @PostMapping("/registro")
-    public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
-        // Validación de email
-        if (usuarioService.buscarPorEmail(usuario.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Error: El email ya está registrado");
-        }
-        // Validación de nombre de usuario
-        if (usuarioService.buscarPorNombreUsuario(usuario.getNombreUsuario()).isPresent()){
-            return ResponseEntity.badRequest().body("Error: El nombre de usuario ya existe");
-        }
-
-        // El método registrarUsuario debe encargarse de encriptar la pass
-        Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-        return ResponseEntity.ok("Usuario registrado con éxito: " + nuevoUsuario.getNombreUsuario());
+public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+    // Validaciones existentes
+    if (usuarioService.buscarPorEmail(usuario.getEmail()).isPresent()) {
+        return ResponseEntity.badRequest().body("Error: El email ya está registrado");
     }
+    if (usuarioService.buscarPorNombreUsuario(usuario.getNombreUsuario()).isPresent()){
+        return ResponseEntity.badRequest().body("Error: El nombre de usuario ya existe");
+    }
+
+    // Registramos al usuario (encriptando la contraseña)
+    Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
+
+    // Generamos el token JWT inmediatamente para el nuevo usuario
+    final String token = jwtUtil.generateToken(nuevoUsuario.getNombreUsuario());
+
+    // Actualizamos la última conexión
+    nuevoUsuario.setUltimaConexion(LocalDateTime.now());
+    usuarioService.guardarSinEncriptar(nuevoUsuario);
+
+    // Construimos la respuesta idéntica a la del Login
+    Map<String, Object> response = new HashMap<>();
+    response.put("token", token);
+    
+    Map<String, Object> userData = new HashMap<>();
+    userData.put("idUsuario", nuevoUsuario.getIdUsuario());
+    userData.put("nombreUsuario", nuevoUsuario.getNombreUsuario());
+    userData.put("email", nuevoUsuario.getEmail());
+    userData.put("fotoPerfil", nuevoUsuario.getFotoPerfil());
+    userData.put("rol", nuevoUsuario.getRol());
+    userData.put("localidad", nuevoUsuario.getLocalidad());
+    userData.put("biografia", nuevoUsuario.getBiografia());
+    
+    response.put("user", userData); 
+    
+    return ResponseEntity.ok(response);
+}
 }

@@ -14,27 +14,34 @@ public class LibroService {
     @Autowired
     private LibroRepository libroRepository;
 
-    public List<Libro> listarTodos() {
-        return libroRepository.findAll();
+    /**
+     * Sincroniza los libros que vienen de la API externa con los datos locales.
+     * Si un libro ya existe en nuestra BD (por ISBN), usamos nuestra valoración y votos.
+     */
+    public List<Libro> enriquecerLibrosConDatosLocales(List<Libro> librosExternos) {
+        for (Libro libroExt : librosExternos) {
+            if (libroExt.getIsbn() != null) {
+                libroRepository.findByIsbn(libroExt.getIsbn()).ifPresent(libroLocal -> {
+                    // Sobrescribimos con los datos de nuestra comunidad
+                    libroExt.setIdLibro(libroLocal.getIdLibro());
+                    libroExt.setValoracion(libroLocal.getValoracion());
+                    libroExt.setVotos(libroLocal.getVotos());
+                });
+            }
+        }
+        return librosExternos;
     }
 
-    public List<Libro> buscarPorTitulo(String titulo) {
-        return libroRepository.findByTituloContainingIgnoreCase(titulo);
+    public Libro obtenerOCrearPorIsbn(Libro datos) {
+        return libroRepository.findByIsbn(datos.getIsbn())
+            .orElseGet(() -> libroRepository.save(datos));
+    }
+
+    public List<Libro> listarTodos() {
+        return libroRepository.findAll();
     }
 
     public Libro guardarLibro(Libro libro) {
         return libroRepository.save(libro);
     }
-
-    public Libro obtenerOCrear(String titulo, String autor, String fotoPortada) {
-    // Buscamos si ya existe por título y autor para evitar duplicados
-    return libroRepository.findByTituloAndAutor(titulo, autor)
-        .orElseGet(() -> {
-            Libro nuevo = new Libro();
-            nuevo.setTitulo(titulo);
-            nuevo.setAutor(autor);
-            nuevo.setFotoPortada(fotoPortada);
-            return libroRepository.save(nuevo);
-        });
-}
 }

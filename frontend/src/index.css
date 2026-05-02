@@ -17,7 +17,7 @@
   /* --- ASIGNACIÓN DE ROLES --- */
   --bg-pagina: var(--color-azul-claro);
   --bg-footer: var(--color-azul-footer);
-  --text-titulos: var(--color-marron-oscuro);
+  --text-titulos: var(--color-marron-medio);
   --text-body: var(--color-marron-medio);
   --accent: var(--color-salmon);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -27,8 +27,8 @@
   --font-body: 'Comme', system-ui, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  /* --- VARIABLE DE DISEÑO (ANCHO) --- */
-  --container-width: 1200px; /* Aquí controlas el alineado de toda la web */
+  /* --- VARIABLE DE DISEÑO --- */
+  --container-width: 1200px;
 
   /* Configuración base */
   font-family: var(--font-body);

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Importado para navegación interna
 import AuthService from '../services/Auth.service';
 import '../assets/css/registro.css'; 
+import '../assets/css/login.css'; // Importamos el CSS de login para usar los estilos del enlace
 
 const Registro = () => {
     // Estado inicial
@@ -53,7 +55,6 @@ const Registro = () => {
             return;
         }
 
-        // Bloqueo por contraseña inválida
         if (!reqLength || !reqUpper || !reqNum) {
             setErrorMessage("La contraseña no cumple todos los requisitos.");
             return;
@@ -65,11 +66,23 @@ const Registro = () => {
         }
 
         try {
-            // Envío
-            await AuthService.register(formData);
-            window.location.href = "/login"; 
+            // Envío al backend
+            const response = await AuthService.register(formData);
+            
+            // Lógica de Login Automático
+            if (response.data && response.data.token) {
+                // Si el backend devuelve token tras registrar, guardamos sesión
+                localStorage.setItem("token", response.data.token);
+                localStorage.setItem("usuario", JSON.stringify(response.data.user));
+                
+                // Redirección directa a Home
+                window.location.href = "/home";
+            } else {
+                // Fallback: si no hay token automático, enviamos al login manual
+                window.location.href = "/login"; 
+            }
         } catch (error) {
-            setErrorMessage("Error al conectar con el servidor.");
+            setErrorMessage("Error al conectar con el servidor o el usuario ya existe.");
         }
     };
 
@@ -97,7 +110,6 @@ const Registro = () => {
                             <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} className="registro-input" required />
                         </div>
                         
-                        {/* Celda vacía */}
                         <div className="registro-form-group hidden-mobile"></div>
 
                         <div className="registro-form-group">
@@ -110,11 +122,10 @@ const Registro = () => {
                             <input type="email" name="email" value={formData.email} onChange={handleChange} className="registro-input" required />
                         </div>
 
-                       {/* Input password con UI dinámica */}
                         <div className="registro-form-group">
                             <label className="registro-label">Contraseña</label>
                             <input type="password" name="password" value={formData.password} onChange={handleChange} className="registro-input" required />
-                                                    
+                                                                                
                             {formData.password.length > 0 && (
                             <div className="registro-hints">
                                 <span className={reqLength ? "hint-met" : "hint-unmet"}>
@@ -135,7 +146,6 @@ const Registro = () => {
                         </div>
                     </div>
 
-                    {/* Alerta de error */}
                     {errorMessage && (
                         <div className="registro-error-msg">
                             {errorMessage}
@@ -143,6 +153,11 @@ const Registro = () => {
                     )}
 
                     <button type="submit" className="registro-button">Registrarse</button>
+
+                    <div className="register-redirect">
+                        <span>¿Ya tienes una cuenta?</span>
+                        <Link to="/login" className="register-link">Inicia sesión aquí</Link>
+                    </div>
                 </form>
             </div>
         </div>

@@ -13,41 +13,51 @@ export default function Pasos() {
     const path = pathRef.current;
     if (!path) return;
 
-    const pathLength = path.getTotalLength();
-    const icons = sectionRef.current.querySelectorAll('.paso__icono-wrapper');
+    // Usamos gsap.context para que todas las animaciones se limpien automáticamente
+    let ctx = gsap.context(() => {
+      const pathLength = path.getTotalLength();
+      const icons = sectionRef.current.querySelectorAll('.paso__icono-wrapper');
 
-    gsap.set(path, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
+      // Configuración inicial del path
+      gsap.set(path, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top center", 
-        end: "bottom center",
-        scrub: 1,
-      }
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top center",
+          end: "bottom center",
+          scrub: 1,
+        }
+      });
 
-    tl.to(path, {
-      strokeDashoffset: 0,
-      ease: "none",
-      duration: 1 
-    }, 0);
-    icons.forEach((icon, index) => {
-      const startTimes = [0.02, 0.30, 0.60, 0.80];
-      const startTime = startTimes[index];
+      // Animación de la línea
+      tl.to(path, {
+        strokeDashoffset: 0,
+        ease: "none",
+        duration: 1
+      }, 0);
 
-      tl.to(icon, {
-        backgroundColor: "#068187",
-        boxShadow: "0 0 50px #00f2ff",
-        scale: 1.15,
-        duration: 0.1,
-      }, startTime)
-      .to(icon.querySelectorAll('path, circle, line'), {
-        stroke: '#000000',
-        duration: 0.1,
-      }, startTime);
-    });
+      // Animación de los iconos
+      icons.forEach((icon, index) => {
+        const startTimes = [0.02, 0.30, 0.60, 0.80];
+        const startTime = startTimes[index];
 
+        tl.to(icon, {
+          backgroundColor: "#068187",
+          boxShadow: "0 0 50px #00f2ff",
+          scale: 1.15,
+          duration: 0.1,
+        }, startTime);
+
+        tl.to(icon.querySelector('.paso__img'), {
+          filter: 'brightness(0) saturate(100%) invert(0%)', // Simula cambio a negro
+          opacity: 1,
+          duration: 0.1,
+        }, startTime);
+      });
+    }, sectionRef); // El scope es sectionRef
+
+    return () => ctx.revert(); // Limpieza al desmontar el componente
   }, []);
 
   return (

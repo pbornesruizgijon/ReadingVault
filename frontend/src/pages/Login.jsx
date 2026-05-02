@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Importante para la navegación SPA
 import AuthService from '../services/Auth.service';
 import '../assets/css/login.css';
 
@@ -58,12 +59,17 @@ const Login = () => {
                     </div>
 
                     <div className="forgot-password-link">
-                        <a href="#" onClick={() => alert("Próximamente...")}>
+                        <a href="#" onClick={(e) => { e.preventDefault(); alert("Próximamente..."); }}>
                             Olvidé mi contraseña
                         </a>
                     </div>
                     
                     <button type="submit" className="login-button">Iniciar sesión</button>
+
+                    <div className="register-redirect">
+                        <span>¿Aún no tienes cuenta?</span>
+                        <Link to="/registro" className="register-link">Regístrate aquí</Link>
+                    </div>
                 </form>
             </div>
         </div>

@@ -17,6 +17,8 @@ export default function DetalleLibro() {
   const [libro, setLibro] = useState(location.state?.libro || null);
   const [cargando, setCargando] = useState(!libro);
   const [sinopsisExpandida, setSinopsisExpandida] = useState(false);
+  const [showMenuVault, setShowMenuVault] = useState(false); // Estado para el menú desplegable
+  const [estanteriaActual, setEstanteriaActual] = useState(null); // Estado del Vault
   
   // Estados de interacción
   const [escribiendo, setEscribiendo] = useState(false);
@@ -24,6 +26,8 @@ export default function DetalleLibro() {
   const [resenasComunidad, setResenasComunidad] = useState([]);
   const [miVoto, setMiVoto] = useState(0);
   const [hoverVoto, setHoverVoto] = useState(0);
+
+  const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
 
   const renderEstrellas = (rating) => {
     const estrellas = [];
@@ -53,17 +57,15 @@ export default function DetalleLibro() {
       if (libroData) {
         setLibro(libroData); 
       } else {
-        // Fallback al state si por alguna razón falla la API pero venimos de la card
         libroData = libro;
       }
 
-      // 3. Cargar reseñas de la comunidad si tenemos el ID (ahora recuperado por ISBN)
       if (libroData?.idLibro) {
         const resResenas = await axios.get(`http://localhost:8080/api/reviews/libro/${libroData.idLibro}`);
         setResenasComunidad(resResenas.data || []);
 
-        const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
         if (usuarioSesion) {
+          // Cargar voto y reseña
           try {
             const resVoto = await axios.get(
               `http://localhost:8080/api/reviews/usuario/${usuarioSesion.idUsuario}/libro/${libroData.idLibro}`
@@ -72,13 +74,23 @@ export default function DetalleLibro() {
               setMiVoto(resVoto.data.puntuacion);
               setTextoResena(resVoto.data.contenido || "");
             }
-          } catch (e) {
-            console.log("El usuario aún no ha votado este libro.");
-          }
+          } catch (e) { console.log("Sin voto previo"); }
+
+          // Cargar estado en el Vault (Biblioteca)
+          try {
+            const token = localStorage.getItem("token");
+            const resVault = await axios.get(
+              `http://localhost:8080/api/bibliotecas/estado?idUsuario=${usuarioSesion.idUsuario}&titulo=${encodeURIComponent(libroData.titulo)}&autor=${encodeURIComponent(libroData.autor)}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (resVault.data?.nombreEstanteria) {
+              setEstanteriaActual(resVault.data.nombreEstanteria);
+            }
+          } catch (e) { console.log("No está en la biblioteca"); }
         }
       }
     } catch (err) {
-      console.error("Error en la carga de datos del vault:", err);
+      console.error("Error en la carga:", err);
     } finally {
       setCargando(false);
     }
@@ -88,20 +100,72 @@ export default function DetalleLibro() {
     cargarDatosYVoto();
   }, [isbn]);
 
+  const manejarCambioVault = async (nombreEstanteria) => {
+    if (!usuarioSesion) {
+      mostrarNotificacion("Debes iniciar sesión", "error");
+      return;
+    }
+
+    const payload = {
+      idUsuario: usuarioSesion.idUsuario,
+      nombreEstanteria: nombreEstanteria,
+      libro: {
+        ...libro,
+        isbn: isbn,
+        portada: libro.portada || libro.fotoPortada,
+        description: libro.descripcion || "Sin descripción disponible."
+      },
+    };
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/bibliotecas/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setEstanteriaActual(nombreEstanteria);
+        setShowMenuVault(false);
+        mostrarNotificacion(`Libro movido a ${nombreEstanteria}`, "success");
+        await cargarDatosYVoto();
+      }
+    } catch (error) {
+      mostrarNotificacion("Error al actualizar el Vault", "error");
+    }
+  };
+
+  const eliminarDeBiblioteca = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/bibliotecas/remove?idUsuario=${usuarioSesion.idUsuario}&titulo=${encodeURIComponent(libro.titulo)}&autor=${encodeURIComponent(libro.autor)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      if (response.ok) {
+        setEstanteriaActual(null);
+        setShowMenuVault(false);
+        mostrarNotificacion("Libro eliminado del Vault", "success");
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+    }
+  };
+
   const manejarVoto = async (puntuacion) => {
-    const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
     if (!usuarioSesion) {
       mostrarNotificacion("Debes iniciar sesión para votar", "error");
       return;
     }
 
     try {
-      // Creamos una copia del libro asegurando que incluya el ISBN de la URL
-      const libroParaEnviar = {
-        ...libro,
-        isbn: isbn // 'isbn' viene del useParams()
-      };
-
+      const libroParaEnviar = { ...libro, isbn: isbn };
       await axios.post('http://localhost:8080/api/reviews/votar', {
         idUsuario: usuarioSesion.idUsuario,
         puntuacion: puntuacion,
@@ -112,13 +176,11 @@ export default function DetalleLibro() {
       await cargarDatosYVoto();
       mostrarNotificacion("¡Puntuación guardada!", "success");
     } catch (err) {
-      console.error("Error al votar:", err);
       mostrarNotificacion("No se pudo registrar el voto", "error");
     }
   };
 
   const enviarResena = async () => {
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (!libro?.idLibro) {
       mostrarNotificacion("Vota primero para habilitar la reseña", "error");
       return;
@@ -126,7 +188,7 @@ export default function DetalleLibro() {
 
     try {
       await axios.post('http://localhost:8080/api/reviews/resenar', {
-        idUsuario: usuario.idUsuario,
+        idUsuario: usuarioSesion.idUsuario,
         idLibro: libro.idLibro,
         contenido: textoResena
       });
@@ -138,6 +200,13 @@ export default function DetalleLibro() {
     }
   };
 
+  const getClaseBoton = () => {
+    if (estanteriaActual === "Pendiente") return "btn-add-vault--pendiente";
+    if (estanteriaActual === "Leyendo") return "btn-add-vault--leyendo";
+    if (estanteriaActual === "Leído") return "btn-add-vault--leido";
+    return ""; 
+  };
+
   if (cargando) return <div className="text-center py-5"><h3>Cargando sabiduría...</h3></div>;
   if (!libro) return null;
 
@@ -146,21 +215,15 @@ export default function DetalleLibro() {
 
   return (
     <>
-      {/* Sistema de notificación */}
       {mensaje.texto && (
         <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
-          {mensaje.tipo === "success" ? (
-            <i className="bi bi-check-circle-fill me-2"></i>
-          ) : (
-            <i className="bi bi-exclamation-triangle-fill me-2"></i>
-          )}
+          <i className={`bi bi-${mensaje.tipo === "success" ? "check-circle" : "exclamation-triangle"}-fill me-2`}></i>
           {mensaje.texto}
         </div>
       )}
       <section className="detalle-top-bg py-5">
         <div className="container-custom">
           <div className="row">
-            {/* Lateral Izquierdo: Portada y Voto */}
             <div className="col-md-4 col-lg-3 text-center mb-4">
               <img 
                 src={libro.portada || libro.fotoPortada || "https://via.placeholder.com/300x450?text=Sin+Portada"} 
@@ -168,14 +231,47 @@ export default function DetalleLibro() {
                 className="detalle-portada shadow-lg mb-4 img-fluid" 
               />
               
-              <button className="btn-estado w-100 mb-4 d-flex justify-content-between px-4">
-                Añadir al Vault <i className="bi bi-caret-down-fill"></i>
+              {/* MENU DESPLEGABLE ESTILO LIBRO CARD */}
+              <div className="libro-card__acciones acciones-detalle mb-4">
+              <button
+                className={`btn-add-vault w-100 ${getClaseBoton()}`}
+                onClick={(e) => {
+                  e.stopPropagation(); // Evita que el evento cierre el menú al instante
+                  setShowMenuVault(!showMenuVault);
+                }}
+              >
+                {estanteriaActual ? estanteriaActual : "Añadir a mi Vault"}
+                <i className={`bi bi-chevron-${showMenuVault ? "up" : "down"} ms-2`}></i>
               </button>
 
-              {/* TARJETA DE VOTACIÓN (Estilo image_3e14f7.png) */}
+              {showMenuVault && (
+                <div className="menu-desplegable" style={{ display: 'block' }}>
+                  <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Pendiente")}>
+                    <i className="bi bi-clock me-2 text-warning"></i> Pendiente
+                    {estanteriaActual === "Pendiente" && <i className="bi bi-check ms-auto"></i>}
+                  </div>
+
+                  <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Leyendo")}>
+                    <i className="bi bi-book-half me-2 text-primary"></i> Leyendo
+                    {estanteriaActual === "Leyendo" && <i className="bi bi-check ms-auto"></i>}
+                  </div>
+
+                  <div className="menu-desplegable__item" onClick={() => manejarCambioVault("Leído")}>
+                    <i className="bi bi-check-circle-fill me-2 text-success"></i> Leído
+                    {estanteriaActual === "Leído" && <i className="bi bi-check ms-auto"></i>}
+                  </div>
+
+                  {estanteriaActual && (
+                    <div className="menu-desplegable__item menu-desplegable__item--eliminar" onClick={eliminarDeBiblioteca}>
+                      <i className="bi bi-trash3 me-2"></i> Eliminar del Vault
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
               <div className="voto-interactivo-card">
                 <p>Tu puntuación</p>
-                
                 <div className="estrellas-selector d-flex justify-content-center mb-4">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <i
@@ -193,7 +289,6 @@ export default function DetalleLibro() {
                     className="btn-escribir-vault"
                     onClick={() => setEscribiendo(true)}
                     disabled={miVoto === 0}
-                    title={miVoto === 0 ? "Vota primero para habilitar" : ""}
                   >
                     <i className="bi bi-pencil-square"></i>
                     <span>{textoResena ? "Editar reseña" : "Escribir reseña"}</span>
@@ -220,7 +315,6 @@ export default function DetalleLibro() {
                 )}
               </div>
 
-              {/* Valoración Global */}
               <div className="detalle-rating text-muted mt-4">
                 <p className="mb-1 small">Valoración global</p>
                 <div className="estrellas mb-1">
@@ -234,7 +328,6 @@ export default function DetalleLibro() {
               </div>
             </div>
 
-            {/* Contenido Derecho */}
             <div className="col-md-8 col-lg-9 d-flex flex-column gap-4">
               <div className="detalle-card p-4 text-center">
                 <h1 className="detalle-titulo">{libro.titulo}</h1>
@@ -263,7 +356,6 @@ export default function DetalleLibro() {
         </div>
       </section>
 
-      {/* Sección de Reseñas Reales */}
       <section className="detalle-reviews-bg py-5">
         <div className="container-custom" style={{ maxWidth: '800px' }}>
           <h2 className="text-center mb-5 detalle-titulo-seccion">Opiniones de la comunidad</h2>

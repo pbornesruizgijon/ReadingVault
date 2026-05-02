@@ -78,7 +78,50 @@ public class LibroController {
     }
 
     /**
-     * Busca libros filtrando por ISBN y eliminando duplicados en el servidor.
+     * Mapea los datos de la API externa pero verificando si el libro existe localmente
+     * para sobreescribir con los votos y valoración de Reading Vault.
+     */
+    private Map<String, Object> mapearYEnriquecerLibro(LibroExternoDTO libroExt) {
+        Map<String, Object> respuesta = new HashMap<>();
+        String isbn = libroExt.getIsbn();
+
+        // Valores base de la API externa
+        respuesta.put("titulo", libroExt.getTitle());
+        respuesta.put("autor", (libroExt.getAuthorNames() != null && !libroExt.getAuthorNames().isEmpty())
+                ? libroExt.getAuthorNames().get(0)
+                : "Autor desconocido");
+        
+        respuesta.put("portada", libroExt.getCoverId());
+        respuesta.put("fotoPortada", libroExt.getCoverId());
+        respuesta.put("descripcion", libroExt.getDescription()); 
+        respuesta.put("isbn", isbn);
+        respuesta.put("fechaPublicacion", libroExt.getPublishedDate());
+        respuesta.put("paginas", libroExt.getPageCount());
+        
+        String categoriasStr = (libroExt.getCategories() != null) 
+                ? String.join(", ", libroExt.getCategories()) 
+                : "General";
+        respuesta.put("generos", categoriasStr);
+
+        // Buscamos si existe en nuestra BD para priorizar nuestros votos/estrellas
+        Optional<Libro> localOpt = libroRepository.findByIsbn(isbn);
+        
+        if (localOpt.isPresent()) {
+            Libro local = localOpt.get();
+            respuesta.put("valoracion", local.getValoracion());
+            respuesta.put("votos", local.getVotos());
+            respuesta.put("idLibro", local.getIdLibro()); // Lo añadimos si existe localmente
+        } else {
+            // Si no existe, usamos los de Google
+            respuesta.put("valoracion", libroExt.getAverageRating());
+            respuesta.put("votos", libroExt.getRatingsCount());
+        }
+        
+        return respuesta;
+    }
+
+    /**
+     * Busca libros y enriquece los resultados con datos de la BD local.
      */
     @GetMapping("/buscar")
     public List<Map<String, Object>> buscar(
@@ -86,25 +129,22 @@ public class LibroController {
             @RequestParam(defaultValue = "1") int pagina,
             @RequestParam(defaultValue = "relevance") String orderBy) {
 
-        // 1. Obtenemos los resultados de Google
+        // Obtenemos resultados de Google
         List<LibroExternoDTO> librosExternos = googleBooksService.buscarLibros(q, pagina, orderBy);
 
-        // 2. Usamos un LinkedHashMap para mantener el orden y asegurar ISBN único
-        // Solo aceptamos libros que tengan ISBN informado
+        // Filtramos por ISBN único
         Map<String, LibroExternoDTO> filtrados = new LinkedHashMap<>();
-        
         for (LibroExternoDTO dto : librosExternos) {
             String isbn = dto.getIsbn();
             if (isbn != null && !isbn.isEmpty() && !isbn.equalsIgnoreCase("null")) {
-                // putIfAbsent evita que ediciones duplicadas sobrescriban la primera aparición
                 filtrados.putIfAbsent(isbn, dto);
             }
         }
 
-        // 3. Mapeamos la lista limpia
+        // Mapeamos usando la nueva función de enriquecimiento
         return filtrados.values().stream()
                 .limit(12)
-                .map(this::mapearLibro)
+                .map(this::mapearYEnriquecerLibro)
                 .collect(Collectors.toList());
     }
 

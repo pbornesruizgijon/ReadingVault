@@ -118,6 +118,49 @@ body {
     color: var(--color-amarillo);
 }
 
+/* --- Registro Redirect --- */
+.register-redirect {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--color-verde-oscuro);
+}
+
+.register-redirect span {
+    opacity: 0.8;
+    margin-right: 8px;
+}
+
+.register-link {
+    color: var(--text-body);
+    text-decoration: none;
+    position: relative;
+    transition: all 0.3s ease;
+    font-family: var(--font-body);
+}
+
+/* Efecto de subrayado moderno */
+.register-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--color-amarillo);
+    transition: width 0.3s ease;
+}
+
+.register-link:hover {
+    color: var(--color-amarillo);
+}
+
+.register-link:hover::after {
+    width: 100%;
+}
+
 /* Ajustes responsive */
 @media (max-width: 480px) {
     .login-panel {
