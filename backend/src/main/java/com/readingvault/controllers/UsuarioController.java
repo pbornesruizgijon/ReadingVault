@@ -142,4 +142,17 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    // Manejar la privacidad
+    @PutMapping("/{id}/privacidad")
+    public ResponseEntity<?> actualizarPrivacidad(@PathVariable Long id, @RequestBody Map<String, String> privacidad) {
+        try {
+            Usuario actualizado = usuarioService.actualizarPrivacidad(id, privacidad);
+            
+            actualizado.setPassword(null);
+            return ResponseEntity.ok(actualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

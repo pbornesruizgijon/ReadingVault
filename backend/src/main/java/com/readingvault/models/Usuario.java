@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,6 +43,7 @@ public class Usuario {
 
     // Relación N:M para múltiples géneros favoritos
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
         name = "usuario_genero", // Tabla intermedia
         joinColumns = @JoinColumn(name = "id_usuario"), 
