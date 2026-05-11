@@ -1,0 +1,102 @@
+/* tusAmigos.css */
+
+.tus-amigos-bg {
+    background-color: var(--bg-pagina);
+    min-height: 85vh;
+}
+
+.btn-add-vault{
+    text-decoration: none;
+}
+
+/* PANEL LATERAL DE NAVEGACIÓN */
+.social-sidebar {
+    background-color: var(--color-azul-footer);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.nav-social-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 18px;
+    background: transparent;
+    border: none;
+    color: var(--color-marron-medio);
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    text-align: left;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-social-link:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-rojo-vino);
+}
+
+.nav-social-link.active {
+    background-color: var(--color-salmon);
+    color: white;
+}
+
+/* TARJETAS DE AMIGOS / SOLICITUDES */
+.amigo-item-card {
+    background-color: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.2s ease;
+}
+
+.amigo-item-card:hover {
+    transform: translateY(-2px);
+}
+
+.amigo-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-azul-footer);
+}
+
+.status-indicator {
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-online { color: #52b788; }
+.status-offline { color: var(--color-salmon); }
+
+/* BUSCADOR */
+.search-amigos-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.search-amigos-input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border-radius: 25px;
+    border: 2px solid var(--color-azul-footer);
+    font-family: var(--font-body);
+}
+
+.search-amigos-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-azul-footer);
+}

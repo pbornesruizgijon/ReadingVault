@@ -3,17 +3,18 @@ import { useNavigate } from "react-router-dom";
 export function SidebarUsuario({ user, stats, estadoRelacion, onAccionAmigo }) {
   const navigate = useNavigate();
   
-  // Recuperamos la sesión actual para comparar IDs
   const miSesion = JSON.parse(localStorage.getItem("usuario"));
   const miId = miSesion ? miSesion.idUsuario : null;
 
-  // Comprobamos los estados de la relación
   const esMiPropioPerfil = miId && user?.idUsuario === miId;
   const sonAmigos = estadoRelacion === "ACEPTADA";
   const solicitudPendiente = estadoRelacion === "PENDIENTE";
 
+  // Vinculamos las stats con los nuevos nombres
   const leidos = stats?.leidos || 0;
   const resenas = stats?.resenas || 0;
+  const amigosCount = stats?.amigos || 0;
+  const gruposCount = stats?.grupos || 0;
   const objetivo = stats?.objetivoReto || 20;
   const porcentaje = Math.round((leidos / objetivo) * 100);
 
@@ -21,7 +22,6 @@ export function SidebarUsuario({ user, stats, estadoRelacion, onAccionAmigo }) {
 
   const FOTO_DEFAULT = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-  // Lógica de privacidad simplificada
   const puedeVer = (nivelPrivacidad) => {
     if (esMiPropioPerfil) return true;
     if (nivelPrivacidad === "Público") return true;
@@ -29,9 +29,8 @@ export function SidebarUsuario({ user, stats, estadoRelacion, onAccionAmigo }) {
     return false;
   };
 
-  // Función para renderizar el botón de amistad según el estado
   const renderBotonAmistad = () => {
-    if (esMiPropioPerfil) return null; // No sale nada en mi propio perfil
+    if (esMiPropioPerfil) return null;
 
     if (sonAmigos) {
       return (
@@ -67,8 +66,6 @@ export function SidebarUsuario({ user, stats, estadoRelacion, onAccionAmigo }) {
           className="foto-perfil-circulo"
           alt="Perfil"
         />
-        
-        {/* Renderizamos el botón de amistad debajo de la foto si no es mi perfil */}
         {renderBotonAmistad()}
       </div>
 
@@ -86,12 +83,12 @@ export function SidebarUsuario({ user, stats, estadoRelacion, onAccionAmigo }) {
               <span className="fw-bold text-dark">{resenas}</span>
             </div>
             <div className="col-6 border-end">
-              <p className="small mb-0 text-muted">Siguiendo</p>
-              <span className="fw-bold text-dark">142</span>
+              <p className="small mb-0 text-muted">Amigos</p>
+              <span className="fw-bold text-dark">{amigosCount}</span>
             </div>
             <div className="col-6">
-              <p className="small mb-0 text-muted">Seguidores</p>
-              <span className="fw-bold text-dark">89</span>
+              <p className="small mb-0 text-muted">Grupos</p>
+              <span className="fw-bold text-dark">{gruposCount}</span>
             </div>
           </div>
         ) : (

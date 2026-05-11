@@ -11,7 +11,7 @@ export default function PerfilUsuario() {
 
     const [usuario, setUsuario] = useState(null);
     const [estadoRelacion, setEstadoRelacion] = useState("NINGUNA");
-    const [stats, setStats] = useState({ leidos: 0, resenas: 0, objetivoReto: 20 });
+    const [stats, setStats] = useState({ leidos: 0, resenas: 0, amigos: 0, grupos: 0, objetivoReto: 20 });
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
@@ -30,7 +30,7 @@ export default function PerfilUsuario() {
         const userObj = JSON.parse(sesion);
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // 1. Datos del Usuario
+        // Datos del Usuario
         fetch(`http://localhost:8080/api/usuarios/${idUsuario}`, { headers })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
@@ -39,7 +39,7 @@ export default function PerfilUsuario() {
             })
             .catch(() => navigate("/"));
 
-        // 2. Verificar Relación
+        // Verificar Relación
         if (userObj.idUsuario !== parseInt(idUsuario)) {
             fetch(`http://localhost:8080/api/amistades/estado/${userObj.idUsuario}/${idUsuario}`, { headers })
                 .then(res => res.ok ? res.text() : "NINGUNA")
@@ -49,7 +49,7 @@ export default function PerfilUsuario() {
             setEstadoRelacion("PROPIO");
         }
 
-        // 3. Stats
+        // Stats - Libros Leídos
         fetch(`http://localhost:8080/api/bibliotecas/usuario/${idUsuario}/completa`, { headers })
             .then(res => res.ok ? res.json() : [])
             .then(items => {
@@ -57,12 +57,23 @@ export default function PerfilUsuario() {
                 setStats(prev => ({ ...prev, leidos: totalLeidos }));
             });
 
+        // Stats - Reseñas
         fetch(`http://localhost:8080/api/reviews/usuario/${idUsuario}/total`, { headers })
             .then(res => res.ok ? res.json() : [])
             .then(reviews => {
                 const totalResenas = reviews.filter(r => r.contenido?.trim()).length;
                 setStats(prev => ({ ...prev, resenas: totalResenas }));
             });
+
+        // Stats - Amigos
+        fetch(`http://localhost:8080/api/amistades/lista/${idUsuario}`, { headers })
+            .then(res => res.ok ? res.json() : [])
+            .then(amigos => {
+                setStats(prev => ({ ...prev, amigos: amigos.length }));
+            });
+
+        // Grupos se mantiene en 0 hasta que implementes el backend de Grupos
+        setStats(prev => ({ ...prev, grupos: 0 }));
 
     }, [idUsuario, navigate]);
 

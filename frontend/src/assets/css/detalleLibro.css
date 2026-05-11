@@ -109,11 +109,17 @@
 }
 
 .review-user h5 {
-    margin: 0; 
+    margin: 0;
+    padding-top: 10px; 
     text-align: center;
     width: 100%;
     font-family: var(--font-titulos);
     color: var(--color-marron-oscuro);
+    text-decoration: none;
+}
+
+.review-user-link{
+    text-decoration: none;
 }
 
 /* BOTÓN VER MÁS AL FINAL */

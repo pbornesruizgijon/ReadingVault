@@ -82,4 +82,30 @@ public class AmistadService {
     public List<Amistad> listarAmistades() {
         return amistadRepository.findAll();
     }
+
+    /**
+     * Obtiene la lista de usuarios que son amigos confirmados.
+     * Filtra la relación para devolver el objeto Usuario del amigo, no la entidad Amistad.
+     */
+    public List<Usuario> obtenerListaAmigos(Long idUsuario) {
+        // Buscamos las relaciones ACEPTADAS donde el usuario sea usuario1 o usuario2
+        List<Amistad> amistades = amistadRepository.findMisAmigos(idUsuario);
+
+        return amistades.stream()
+            .map(a -> {
+                // Si yo soy el usuario1, mi amigo es el usuario2
+                if (a.getUsuario1().getIdUsuario().equals(idUsuario)) {
+                    return a.getUsuario2();
+                }
+                // Si yo soy el usuario2, mi amigo es el usuario1
+                return a.getUsuario1();
+            })
+            .toList();
+    }
+
+    // Método opcional para contar cuántos amigos hay en total
+    public long contarAmigos(Long idUsuario) {
+        return amistadRepository.findMisAmigos(idUsuario).size();
+    }
+
 }
