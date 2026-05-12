@@ -1,24 +1,26 @@
+/* comunidad.css */
+
 /* Fondo general */
 .comunidad-bg {
-    background-color: #d6f6e5; /* Menta claro */
+    background-color: var(--bg-pagina); 
     min-height: 100vh;
 }
 
 .comunidad-titulo {
     font-family: var(--font-titulos), serif;
     font-size: 3rem;
-    color: #3b4543;
+    color: var(--color-marron-oscuro);
 }
 
 /* Caja del buscador */
 .busqueda-container {
-    background-color: #9ebcb6; /* Salvia oscuro */
+    background-color: var(--color-azul-footer);
     border-radius: 15px;
 }
 
 .input-buscar:focus {
     box-shadow: none;
-    border-color: #ced4da;
+    border-color: var(--color-azul-footer);
 }
 
 /* Pestañas */
@@ -34,15 +36,16 @@
     border: none;
     padding: 8px 15px;
     border-radius: 8px;
-    color: #4a5754;
+    color: var(--color-marron-medio);
     font-weight: 600;
     transition: all 0.2s;
+    font-family: var(--font-body);
 }
 
 .btn-tab.active {
     background-color: white;
-    color: #3b4543;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: var(--color-marron-oscuro);
+    box-shadow: var(--shadow);
 }
 
 /* Tarjetas */
@@ -50,7 +53,7 @@
     background-color: white;
     border-radius: 15px;
     border: none;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow);
     overflow: hidden;
     transition: transform 0.2s;
 }
@@ -66,8 +69,8 @@
 }
 
 .lectura-actual {
-    background-color: #f8f9fa;
-    border: 1px dashed #ced4da;
+    background-color: var(--bg-pagina);
+    border: 1px dashed var(--color-azul-footer);
 }
 
 /* Elementos de Usuario */
@@ -76,27 +79,28 @@
     height: 90px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #d6f6e5;
+    border: 3px solid var(--color-azul-footer);
 }
 
 /* Botones de acción */
 .btn-crear-grupo {
-    background-color: #f6c860; /* Amarillo */
-    color: white;
+    background-color: var(--color-amarillo);
+    color: var(--color-marron-oscuro);
     border: none;
     padding: 10px 25px;
     border-radius: 30px;
     font-weight: bold;
     font-size: 1.1rem;
+    font-family: var(--font-titulos);
     transition: background-color 0.2s;
 }
 
 .btn-crear-grupo:hover {
-    background-color: #dfb24e;
+    filter: brightness(0.9);
 }
 
 .btn-unirse {
-    background-color: #c98b80; /* Salmón */
+    background-color: var(--accent);
     color: white;
     border: none;
     padding: 8px 15px;
@@ -106,13 +110,13 @@
 }
 
 .btn-unirse:hover {
-    background-color: #b37a70;
+    filter: brightness(0.9);
 }
 
 .btn-seguir {
     background-color: transparent;
-    color: #9ebcb6; /* Salvia */
-    border: 2px solid #9ebcb6;
+    color: var(--color-azul-footer);
+    border: 2px solid var(--color-azul-footer);
     padding: 6px 15px;
     border-radius: 8px;
     font-weight: 600;
@@ -120,6 +124,6 @@
 }
 
 .btn-seguir:hover {
-    background-color: #9ebcb6;
+    background-color: var(--color-azul-footer);
     color: white;
 }
