@@ -1,0 +1,163 @@
+/* ==========================================================================
+   --- COMPONENTE: CREAR NOTICIA ADMIN ---
+   ========================================================================== */
+
+/* Botón disparador inicial (Publicar nueva noticia) */
+.btn-publicar-noticia {
+  background-color: var(--color-verde-oscuro);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.5rem 1.5rem;
+  border-radius: 30px;
+  border: none;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-publicar-noticia:hover {
+  background-color: var(--color-marron-medio);
+  transform: translateY(-1px);
+}
+
+/* Contenedor tipo tarjeta del formulario */
+.noticia-form-card {
+  background-color: #ffffff !important; /* Forzado a blanco opaco para evitar transparencias */
+  border-radius: 18px;
+  border: 1px solid rgba(60, 21, 24, 0.1);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.noticia-form-card__titulo {
+  font-family: var(--font-titulos);
+  color: var(--color-verde-oscuro);
+  font-weight: 700;
+}
+
+.form-label-custom {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-titulos);
+  margin-bottom: 0.4rem;
+}
+
+/* Modificadores de inputs y textarea del formulario */
+.noticia-form-card .form-control {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  background-color: #ffffff !important; /* Asegura fondo opaco en el input */
+  color: var(--text-body);
+  border: 1px solid rgba(60, 21, 24, 0.2);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+}
+
+.noticia-form-card .form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.25rem rgba(194, 132, 122, 0.2);
+}
+
+/* Selector Switch */
+.noticia-form-card .form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* DESPLEGABLE DE RESULTADOS (Fondo opaco y posicionamiento absoluto) */
+.noticia-form-card .buscador-resultados-lista {
+  position: absolute;
+  width: 100%;
+  background-color: #ffffff !important; /* Capa blanca sólida absoluta anti-transparencias */
+  border: 1px solid rgba(60, 21, 24, 0.15);
+  border-radius: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.4rem 0;
+  margin: 4px 0 0 0;
+  list-style: none;
+  z-index: 1050; /* Queda siempre por encima de las tarjetas inferiores */
+}
+
+.noticia-form-card .buscador-resultado-item {
+  padding: 0.6rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-body);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.noticia-form-card .buscador-resultado-item:hover {
+  background-color: rgba(155, 196, 188, 0.25); /* Tono azul-footer suave */
+  color: var(--color-marron-oscuro);
+}
+
+.noticia-form-card .buscador-resultado-img {
+  width: 25px;
+  height: 35px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Bloque identificador del libro seleccionado */
+.libro-vinculado-badge {
+  background-color: rgba(155, 196, 188, 0.15);
+  border: 1px solid var(--color-azul-footer);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.badge-seleccionado {
+  background-color: var(--color-verde-oscuro);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: var(--font-body);
+}
+
+.libro-vinculado-texto {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--color-marron-oscuro);
+  font-size: 0.85rem;
+}
+
+.btn-cambiar-libro {
+  background: none;
+  border: none;
+  color: var(--color-rojo-vino);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: auto;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Botón de Envío del Formulario */
+.btn-enviar-noticia {
+  background-color: var(--color-verde-oscuro);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  padding: 0.6rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-enviar-noticia:hover {
+  background-color: var(--color-marron-medio);
+}

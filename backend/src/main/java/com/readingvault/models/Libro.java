@@ -28,4 +28,7 @@ public class Libro {
     private Integer paginas; 
     private Integer votos = 0;
     private Double valoracion = 0.0;
+
+    @Column(nullable = false)
+    private Boolean destacadoAnio = false; // Bandera para fijar el libro del año desde el panel de administración
 }

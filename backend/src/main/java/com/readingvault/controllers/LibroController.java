@@ -8,9 +8,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -136,7 +139,6 @@ public class LibroController {
                     .limit(tamañoPagina)
                     .map(this::mapearLibroLocal)
                     .collect(Collectors.toList());
-
         } else {
             // MANUAL: 100% GOOGLE BOOKS
             String googleOrder = orderBy.equals("rating") ? "relevance" : orderBy;
@@ -146,7 +148,6 @@ public class LibroController {
                     .limit(tamañoPagina)
                     .map(this::mapearYEnriquecerLibro)
                     .collect(Collectors.toList());
-
             // Ordenación API
             if ("rating".equals(orderBy)) {
                 respuesta.sort((a, b) -> Double.compare(
@@ -197,7 +198,7 @@ public class LibroController {
             return ResponseEntity.badRequest().build();
         }
 
-        // 1. Buscar si ya existe por ISBN o por Título y Autor
+        // Buscar si ya existe por ISBN o por Título y Autor
         Optional<Libro> existe = Optional.empty();
         if (isbn != null && !isbn.isEmpty()) {
             existe = libroRepository.findByIsbn(isbn);
@@ -207,7 +208,7 @@ public class LibroController {
         }
         
         if (existe.isEmpty()) {
-            // 2. Si no existe de ninguna forma, lo creamos de cero
+            // Si no existe de ninguna forma, lo creamos de cero
             Libro nuevo = new Libro();
             nuevo.setIsbn(isbn);
             nuevo.setTitulo(titulo);
@@ -228,7 +229,7 @@ public class LibroController {
             libroRepository.save(nuevo);
             
         } else {
-            // 3. ¡AUTO-REPARACIÓN! Si existe pero le faltan datos, los completamos
+            // Si existe pero le faltan datos, los completamos
             Libro libroGuardado = existe.get();
             boolean necesitaActualizar = false;
 
@@ -248,6 +249,43 @@ public class LibroController {
         }
         
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/marcar-libro-anio")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> marcarLibroAnio(@PathVariable Long id) {
+        // Buscars si ya hay algún libro marcado como libro del año y lo desmarco
+        libroRepository.findByDestacadoAnio(true).ifPresent(libroViejo -> {
+            libroViejo.setDestacadoAnio(false);
+            libroRepository.save(libroViejo);
+        });
+
+        // Marcar el nuevo libro
+        return libroRepository.findById(id)
+                .map(libro -> {
+                    libro.setDestacadoAnio(true);
+                    libroRepository.save(libro);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/libro-anio")
+    public ResponseEntity<?> obtenerLibroAnio() {
+        // Buscamos el libro destacado del año en la base de datos
+        Optional<Libro> libroOpt = libroRepository.findByDestacadoAnio(true);
+        
+        // Si no hay ninguno, usamos el último libro registrado en el sistema
+        if (libroOpt.isEmpty()) {
+            libroOpt = libroRepository.findFirstByOrderByIdLibroDesc();
+        }
+        
+        // Si encontramos un libro, lo enviamos mapeado
+        if (libroOpt.isPresent()) {
+            return ResponseEntity.ok(mapearLibroLocal(libroOpt.get()));
+        }
+        
+        return ResponseEntity.notFound().build();
     }
 
     // Precarga
