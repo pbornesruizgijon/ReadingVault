@@ -59,7 +59,6 @@ function App() {
           <Route path="/libro/:isbn" element={<DetalleLibro />} />
           <Route path="/mis-amigos" element={<ListaAmigos />} />
           <Route path="/usuarios/:idUsuario/amigos" element={<ListaAmigos />} />
-          <Route path="/tusamigos" element={<TusAmigos />} />
           <Route path="/comunidad/grupo/:id" element={<DetalleGrupo />} />
           <Route path="*" element={<div style={{ padding: '50px', textAlign: 'center' }}><h2>404 - Página no encontrada</h2></div>} />
         </Routes>
