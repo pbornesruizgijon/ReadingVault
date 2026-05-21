@@ -98,10 +98,38 @@ public class NoticiaController {
     public ResponseEntity<Noticia> editarNoticia(@PathVariable Long id, @RequestBody Noticia datosActualizados) {
         return noticiaRepository.findById(id)
                 .map(noticia -> {
-                    // Actualizamos únicamente los campos editables del artículo
+                    // Actualizamos los campos de texto base
                     noticia.setTitulo(datosActualizados.getTitulo());
                     noticia.setContenido(datosActualizados.getContenido());
                     
+                    // Gestionamos la actualización del libro asociado
+                    if (datosActualizados.getLibro() != null) {
+                        Libro libroNoticia = datosActualizados.getLibro();
+
+                        if (libroNoticia.getIsbn() != null && !libroNoticia.getIsbn().trim().isEmpty()) {
+                            Optional<Libro> existe = libroRepository.findByIsbn(libroNoticia.getIsbn().trim());
+
+                            if (existe.isEmpty() && libroNoticia.getTitulo() != null && libroNoticia.getAutor() != null) {
+                                existe = libroRepository.findByTituloAndAutor(libroNoticia.getTitulo(), libroNoticia.getAutor());
+                            }
+
+                            if (existe.isPresent()) {
+                                // Si el libro nuevo ya existe en BD local, vinculamos ese
+                                noticia.setLibro(existe.get());
+                            } else {
+                                // Si es un libro nuevo para el sistema, lo guardamos primero
+                                Libro libroGuardado = libroRepository.save(libroNoticia);
+                                noticia.setLibro(libroGuardado);
+                            }
+                        } else {
+                            noticia.setLibro(null);
+                        }
+                    } else {
+                        // Si en la edición se quitó el libro, lo ponemos a null
+                        noticia.setLibro(null);
+                    }
+                    
+                    // 3. Guardamos la noticia con el nuevo libro ya vinculado
                     Noticia guardada = noticiaRepository.save(noticia);
                     return ResponseEntity.ok(guardada);
                 })

@@ -82,7 +82,8 @@
 
 /* Hover botón buscar */
 .search-bar__button:hover {
-    background-color: var(--color-verde-oscuro); 
+    background-color: var(--color-amarillo); 
+    color: var(--color-verde-oscuro);
 }
 
 /* Grid de resultados */

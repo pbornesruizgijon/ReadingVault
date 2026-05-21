@@ -47,7 +47,6 @@ public class RetoLecturaService {
                 .orElseThrow(() -> new RuntimeException("Estantería no encontrada"));
 
         // Contamos cuántos libros hay en esa estantería cuya fecha es de este año
-        // Esto lo podemos hacer con un método en LibroEstanteriaRepository
         long totalCompletados = libroEstanteriaRepository.countByEstanteriaAndFechaAgregadoBetween(
                 leidos, 
                 LocalDate.of(year, 1, 1), 
@@ -61,5 +60,5 @@ public class RetoLecturaService {
     public RetoLectura obtenerRetoPorUsuarioYAnio(Long usuarioId, int year) {
     return retoRepository.findByUsuario_IdUsuarioAndYear(usuarioId, year)
             .orElseThrow(() -> new RuntimeException("No tienes un reto activo para este año"));
-}
+    }
 }

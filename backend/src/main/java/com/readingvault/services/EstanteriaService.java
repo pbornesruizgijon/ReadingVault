@@ -1,5 +1,6 @@
 package com.readingvault.services;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,13 +31,16 @@ public class EstanteriaService {
     @Autowired
     private LibroEstanteriaRepository libroEstanteriaRepository;
 
+    @Autowired
+    private RetoLecturaService retoLecturaService;
+
     @Transactional
     public void agregarLibroAEstanteria(Map<String, Object> libroData, Long usuarioId, String nombreEstanteria) {
         String titulo = (String) libroData.get("titulo");
         String autor = (String) libroData.get("autor");
         String isbn = (String) libroData.get("isbn");
 
-        // 1. Intentamos buscar en nuestra BD local
+        // Intentamos buscar en nuestra BD local
         Optional<Libro> libroOpt = (isbn != null && !isbn.isEmpty()) 
             ? libroRepository.findByIsbn(isbn) 
             : libroRepository.findByTituloAndAutor(titulo, autor);
@@ -46,15 +50,13 @@ public class EstanteriaService {
         if (libroOpt.isPresent()) {
             libroLocal = libroOpt.get();
         } else {
-            // 2. Si no está en BD, necesitamos el libro COMPLETO antes de insertar
-            // Hacemos una búsqueda específica en la API para obtener todos los campos
+            // Si no está en BD, necesitamos el libro COMPLETO antes de insertar
             String queryEnriquecer = (isbn != null && !isbn.isEmpty()) ? "isbn:" + isbn : "intitle:\"" + titulo + "\" inauthor:\"" + autor + "\"";
             var resultadosFull = googleBooksService.buscarLibros(queryEnriquecer, 1, "relevance");
 
             Libro nuevoLibro = new Libro();
             
             if (resultadosFull != null && !resultadosFull.isEmpty()) {
-                // Usamos los datos enriquecidos de la API
                 var libroFull = resultadosFull.get(0);
                 nuevoLibro.setTitulo(libroFull.getTitle());
                 nuevoLibro.setAutor(libroFull.getNombrePrimerAutor());
@@ -66,7 +68,6 @@ public class EstanteriaService {
                 nuevoLibro.setValoracion(libroFull.getAverageRating());
                 nuevoLibro.setVotos(libroFull.getRatingsCount());
             } else {
-                // Fallback: Si Google no devuelve nada raro, usamos lo que venía del front
                 nuevoLibro.setTitulo(titulo);
                 nuevoLibro.setAutor(autor);
                 nuevoLibro.setIsbn(isbn);
@@ -74,14 +75,13 @@ public class EstanteriaService {
                 nuevoLibro.setDescripcion((String) libroData.getOrDefault("descripcion", "Sin descripción."));
             }
 
-            // Mantenemos tus géneros del frontend
             String generosFront = (String) libroData.get("generos");
             nuevoLibro.setGeneros(generosFront != null ? generosFront : "General");
 
             libroLocal = libroRepository.save(nuevoLibro);
         }
 
-        // 3. Gestionar la estantería del usuario
+        // Gestionar la estantería del usuario
         eliminarLibroDeUsuario(usuarioId, libroLocal.getTitulo(), libroLocal.getAutor());
 
         if (!"cancelar".equalsIgnoreCase(nombreEstanteria)) {
@@ -93,6 +93,9 @@ public class EstanteriaService {
             relacion.setLibro(libroLocal); 
             libroEstanteriaRepository.save(relacion);
         }
+
+        // Sincronizamos el reto tanto si entra a "Leído" como si sale de ella hacia otra estantería
+        actualizarRetoSilencioso(usuarioId);
     }
 
     @Transactional
@@ -100,6 +103,19 @@ public class EstanteriaService {
         Optional<Libro> libro = libroRepository.findByTituloAndAutor(titulo, autor);
         if (libro.isPresent()) {
             libroEstanteriaRepository.deleteByLibroAndEstanteria_Usuario_IdUsuario(libro.get(), idUsuario);
+        }
+        
+        // Al eliminar de la biblioteca de manera directa, recalculamos por si estaba en "Leído"
+        actualizarRetoSilencioso(idUsuario);
+    }
+
+    // Método auxiliar privado para actualizar el progreso del reto capturando fallos si no tiene reto activo
+    private void actualizarRetoSilencioso(Long usuarioId) {
+        int anioActual = LocalDate.now().getYear();
+        try {
+            retoLecturaService.actualizarProgreso(usuarioId, anioActual);
+        } catch (Exception e) {
+            System.out.println("No se actualizó el contador del reto: " + e.getMessage());
         }
     }
 

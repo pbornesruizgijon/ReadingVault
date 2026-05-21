@@ -153,6 +153,18 @@ export default function DetalleLibro() {
         setEstanteriaActual(nombreEstanteria);
         setShowMenuVault(false);
         mostrarNotificacion(`Libro movido a ${nombreEstanteria}`, "success");
+
+        if (nombreEstanteria === "Leído") {
+          try {
+            await axios.get(`http://localhost:8080/api/retos/usuario/${usuarioSesion.idUsuario}/actual`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            });
+          } catch (retoErr) {
+            console.error("Error al forzar la sincronización del reto:", retoErr);
+          }
+        }
+
+        // Refrescamos toda la info de la pantalla para que los contadores visuales cambien al segundo
         await cargarDatosYVoto();
       }
     } catch (error) {

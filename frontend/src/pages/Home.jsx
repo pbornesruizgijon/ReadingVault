@@ -76,7 +76,7 @@ export default function Home() {
 
         const totalLeidosManual = items.filter((i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO").length;
 
-        return fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}`, { headers })
+        return fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}/actual`, { headers })
           .then((resReto) => {
             if (!resReto.ok) throw new Error("Reto no creado en base de datos todavía");
             return resReto.json();
@@ -111,7 +111,6 @@ export default function Home() {
         return res.json();
       })
       .then((data) => {
-        // Plan A: El endpoint nos da el libro de 5 estrellas de un amigo
         setLibroAmigo({
           isbn: data.libro.isbn,
           titulo: data.libro.titulo,
@@ -121,7 +120,6 @@ export default function Home() {
         setNombreRecomendador(`tu amigo ${data.nombreAmigo || "un amigo"}`);
       })
       .catch(() => {
-        // Plan B: Si no hay amigos con notas de 5, tiramos del catálogo global de ReadingVault
         fetch("http://localhost:8080/api/libros/buscar?q=libros&isGenero=false", { headers })
           .then((res) => (res.ok ? res.json() : []))
           .then((todosLosLibros) => {
@@ -250,12 +248,12 @@ export default function Home() {
           const totalLeidosManual = items.filter((i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO").length;
 
           try {
-            const resReto = await fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}`, { headers });
+            const resReto = await fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}/actual`, { headers });
             if (resReto.ok) {
               const retoData = await resReto.json();
               setStats({
                 leidos: retoData.completados !== undefined ? retoData.completados : totalLeidosManual,
-                objetivoReto: retoData.objetivoLibros || miSesion.objetivoLectura || 20
+                objectiveReto: retoData.objetivoLibros || miSesion.objetivoLectura || 20
               });
             } else {
               setStats({ leidos: totalLeidosManual, objetivoReto: miSesion.objetivoLectura || 20 });
@@ -287,22 +285,61 @@ export default function Home() {
         {/* --- COLUMNA IZQUIERDA --- */}
         <aside className="home-grid__sidebar-left">
           <section className="infoUsuario">
+            
+            {/* NUEVO BLOQUE: Enlace directo a Mis Libros */}
+            <div 
+              className="mis-libros-card"
+              onClick={() => navigate("/mislibros")}
+              style={{ cursor: "pointer" }}
+            >
+              <h3 className="mis-libros-card__titulo">Mi biblioteca</h3>
+              <div className="mis-libros-card__cuerpo text-center py-2">
+                <div className="mis-libros-card__icono mb-2">
+                  <i className="bi bi-bookshelf" style={{ fontSize: "2rem", color: "var(--color-verde-oscuro)" }}></i>
+                </div>
+                <span className="mis-libros-card__btn-texto">Ver mis estanterías</span>
+              </div>
+            </div>
+
+            {/* Bloque Leyendo actualmente */}
             <div className="leyendo">
               <h3 className="leyendo__titulo">Leyendo actualmente</h3>
               {libroLeyendo ? (
-                <div className="leyendo__libro" onClick={handleActualizarProgreso}>
-                  <picture className="libro__picture">
+                <div className="leyendo__libro flex-column align-items-center text-center">
+                  
+                  <picture 
+                    className="libro__picture mb-3" 
+                    onClick={() => navigate(`/libro/${libroLeyendo.isbn}`)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <img src={libroLeyendo.portada || libroLeyendo.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroLeyendo.titulo} className="libro__portada" />
                   </picture>
-                  <div className="libro__info">
-                    <h4 className="libro__titulo">{libroLeyendo.titulo}</h4>
-                    <h4 className="libro__escritor">{libroLeyendo.autor || "Autor Desconocido"}</h4>
-                    <div className="libro__progreso">
-                      <span className="progreso__actual">Página {pagActual} / {pagTotales}</span>
-                      <div className="progress-container mt-2">
+
+                  <div className="libro__info w-100">
+                    <div 
+                      onClick={() => navigate(`/libro/${libroLeyendo.isbn}`)} 
+                      style={{ cursor: "pointer" }}
+                      className="mb-3"
+                    >
+                      <h4 className="libro__titulo mb-1">{libroLeyendo.titulo}</h4>
+                      <h4 className="libro__escritor m-0">{libroLeyendo.autor || "Autor Desconocido"}</h4>
+                    </div>
+
+                    <div 
+                      className="libro__progreso mt-auto"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleActualizarProgreso();
+                      }}
+                      style={{ cursor: "pointer" }}
+                      title="Haga clic para actualizar su página actual"
+                    >
+                      <span className="progreso__actual d-block mb-1">Página {pagActual} / {pagTotales}</span>
+                      <div className="progress-container">
                         <div className="progress-bar-fill" style={{ width: `${Math.min(porcentajeLibro, 100)}%` }}></div>
                       </div>
                     </div>
+
                   </div>
                 </div>
               ) : (
@@ -310,6 +347,7 @@ export default function Home() {
               )}
             </div>
 
+            {/* Bloque Reto del año */}
             <div 
               className="reto" 
               onClick={() => navigate("/reto")}
@@ -368,34 +406,40 @@ export default function Home() {
         <aside className="home-grid__sidebar-right">
           <section className="recomendaciones">
             {libroAmigo && (
-              /* Hacemos clicable toda la card usando el evento onClick y el navigate */
               <div 
-                className="recomendacion" 
+                className="recomendacion text-center" 
                 onClick={() => navigate(`/libro/${libroAmigo.isbn}`)}
                 style={{ cursor: "pointer" }} 
               >
                 <h3 className="recomendacion__titulo">¡Te recomendamos!</h3>
-                <div className="recomendacion__bloque-info">
-                  <picture className="recomendacion__picture">
-                    <img src={libroAmigo.portada || libroAmigo.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroAmigo.titulo} className="recomendacion__portada" />
+                
+                <div className="d-flex flex-column align-items-center">
+                  <picture className="recomendacion__picture mb-3">
+                    <img 
+                      src={libroAmigo.portada || libroAmigo.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} 
+                      alt={libroAmigo.titulo} 
+                      className="recomendacion__portada" 
+                    />
                   </picture>
-                  <div className="recomendacion__textos">
-                    <h4 className="recomendacion__libro">{libroAmigo.titulo}</h4>
+                  
+                  <div className="recomendacion__textos w-100 mb-3">
+                    <h4 className="recomendacion__libro mb-1">{libroAmigo.titulo}</h4>
                     <h4 className="recomendacion__autor">{libroAmigo.autor || "Autor Desconocido"}</h4>
                   </div>
                 </div>
-                <p className="recomendacion__amigo">Selección de {nombreRecomendador}</p>
+                
+                <p className="recomendacion__amigo m-0">Selección de {nombreRecomendador}</p>
               </div>
             )}
 
             {libroAnio && (
               <div 
-                className="libroAño"
+                className="libroAño text-center"
                 onClick={() => navigate(`/libro/${libroAnio.isbn}`)}
                 style={{ cursor: "pointer" }}
               >
-                <div className="d-flex justify-content-between align-items-center mb-2" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="recomendacion__titulo m-0">¡Libro del año!</h3>
+                <div className="libro-anio-titulo-admin" onClick={(e) => e.stopPropagation()}>
+                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0, margin: 0 }}>¡Libro del año!</h3>
                   {esAdmin && (
                     <button 
                       onClick={handleCambiarLibroAnioAdmin}
@@ -408,13 +452,17 @@ export default function Home() {
                   )}
                 </div>
 
-                <div className="recomendacion__bloque-info">
-                  <picture className="recomendacion__picture">
-                    <img src={libroAnio.portada || libroAnio.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroAnio.titulo} className="recomendacion__portada" />
+                <div className="d-flex flex-column align-items-center mt-3">
+                  <picture className="recomendacion__picture mb-3">
+                    <img 
+                      src={libroAnio.portada || libroAnio.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} 
+                      alt={libroAnio.titulo} 
+                      className="recomendacion__portada" 
+                    />
                   </picture>
-                  <div className="recomendacion__textos">
-                    <h4 className="recomendacion__libro">{libroAnio.titulo}</h4>
-                    <h4 className="recomendacion__autor">{libroAnio.autor || "Autor Desconocido"}</h4>
+                  <div className="recomendacion__textos w-100">
+                    <h4 className="recomendacion__libro mb-1">{libroAnio.titulo}</h4>
+                    <h4 className="recomendacion__autor m-0">{libroAnio.autor || "Autor Desconocido"}</h4>
                   </div>
                 </div>
               </div>

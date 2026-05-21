@@ -46,6 +46,11 @@
     color: white;
 }
 
+.btn-ver-perfil:hover{
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
+}
+
 /* TARJETAS DE AMIGOS / SOLICITUDES */
 .amigo-item-card {
     background-color: white;

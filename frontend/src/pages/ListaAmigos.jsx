@@ -183,7 +183,7 @@ export default function TusAmigos() {
                             <span>{estado.texto}</span>
                           </div>
                         </div>
-                        <Link to={`/perfil/${amigo.idUsuario}`} className="btn-add-vault py-1 px-3" style={{width: 'auto'}}>Ver Perfil</Link>
+                        <Link to={`/perfil/${amigo.idUsuario}`} className="btn-add-vault btn-ver-perfil py-1 px-3" style={{width: 'auto'}}>Ver Perfil</Link>
                       </div>
                     );
                   })

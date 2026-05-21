@@ -1,10 +1,10 @@
 /* home.css */
 
-/* DISTRIBUCIÓN EN REJILLA (Grid Principal) */
+/* DISTRIBUCIÓN EN REJILLA */
 .home-grid {
   display: grid;
-  grid-template-columns: 280px 1fr 300px;
-  gap: 2rem;
+  grid-template-columns: 240px 1fr 260px;
+  gap: 1.5rem;
   align-items: start;
   width: 100%;
 }
@@ -15,6 +15,30 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+}
+
+/* ESTILOS COMPARTIDOS PARA TÍTULOS DE SECCIÓN */
+.leyendo__titulo, 
+.reto__titulo, 
+.recomendacion__titulo,
+.libro-anio-titulo-admin {
+  font-family: var(--font-titulos);
+  color: var(--color-verde-oscuro);
+  font-size: 1.25rem;
+  font-weight: 700;
+  background-color: rgba(155, 196, 188, 0.18);
+  text-align: center;
+  
+  /* Rompen el padding de la tarjeta para ocupar todo el ancho */
+  margin-top: -1.5rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-bottom: 1.5rem;
+  
+  /* Padding interno para centrar y dar aire al texto */
+  padding: 1rem 1.5rem;
+  border-radius: 16px 16px 0 0;
+  border-bottom: none;
 }
 
 /* COLUMNA IZQUIERDA (Perfil Literario y Reto) */
@@ -30,28 +54,19 @@
   padding: 1.5rem;
   box-shadow: var(--shadow);
   border: 1px solid rgba(60, 21, 24, 0.08);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.leyendo__titulo, .reto__titulo {
-  font-family: var(--font-titulos);
-  color: var(--color-verde-oscuro);
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
-  border-bottom: 2px solid rgba(155, 196, 188, 0.3);
-  padding-bottom: 0.5rem;
+.leyendo:hover{
+  transform: scale(1.03);
 }
 
-/* Bloque del libro que estás leyendo actualmente */
+/* Modificado para soportar la reorientación vertical del JSX */
 .leyendo__libro {
   display: flex;
   gap: 1rem;
   cursor: pointer;
   transition: transform 0.2s ease;
-}
-
-.leyendo__libro:hover {
-  transform: scale(1.02);
 }
 
 .libro__picture {
@@ -98,7 +113,7 @@
   font-weight: 600;
 }
 
-/* Barras de progreso comunes */
+/* Barras de progreso */
 .progress-container, .progress-container-reto {
   background-color: rgba(155, 196, 188, 0.2);
   border-radius: 10px;
@@ -142,6 +157,11 @@
 }
 
 /* COLUMNA CENTRAL (Tablón de Bienvenida y Noticias) */
+.home-grid__main {
+  width: 100%;
+  min-width: 0;
+}
+
 .noticias__bienvenida {
   background-color: var(--color-verde-oscuro);
   color: #ffffff;
@@ -188,9 +208,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  width: 100%;
 }
 
-/* Tarjeta de noticia individual */
 .noticia-card {
   background-color: #ffffff;
   border-radius: 16px;
@@ -198,6 +218,9 @@
   box-shadow: var(--shadow);
   border: 1px solid rgba(60, 21, 24, 0.06);
   transition: transform 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .noticia-titulo-principal {
@@ -205,12 +228,15 @@
   color: var(--color-verde-oscuro);
   font-size: 1.4rem;
   font-weight: 700;
+  word-break: break-word;
 }
 
-/* Nuevo contenedor reordenado para el libro dentro de la noticia */
 .noticia-libro-vinculado {
   transition: background-color 0.2s ease, transform 0.2s ease;
   border-radius: 12px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .noticia-libro-vinculado:hover {
@@ -229,14 +255,16 @@
 .noticia-libro-titulo {
   font-family: var(--font-titulos);
   color: var(--color-verde-oscuro);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .noticia-contenido {
   font-family: var(--font-body);
   color: var(--text-body);
+  word-break: break-word;
 }
 
-/* Footer del feed y paginación */
 .noticias__footer {
   text-align: center;
   margin-top: 2rem;
@@ -270,13 +298,7 @@
   padding: 1.5rem;
   box-shadow: var(--shadow);
   border: 1px solid rgba(60, 21, 24, 0.08);
-}
-
-.recomendacion__titulo {
-  font-family: var(--font-titulos);
-  color: var(--color-verde-oscuro);
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .recomendacion__bloque-info {
@@ -350,31 +372,7 @@
   color: var(--color-verde-oscuro);
 }
 
-/* ==========================================================================
-   MODIFICACIÓN: Añadir transiciones base a los contenedores
-   ========================================================================== */
-
-.leyendo, .reto {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(60, 21, 24, 0.08);
-  /* Añadimos transiciones suaves para todo (sombras, bordes y transformación) */
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.recomendacion, .libroAño {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(60, 21, 24, 0.08);
-  /* Añadimos transiciones suaves para todo */
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* Efecto al pasar el ratón por encima del Reto, la Recomendación y el Libro del Año */
+/* INTERACCIONES Y EFECTOS HOVER */
 .reto:hover, 
 .recomendacion:hover, 
 .libroAño:hover {
@@ -383,12 +381,51 @@
   border-color: rgba(155, 196, 188, 0.5);
 }
 
-/* Pequeño extra estético para la barra de progreso del reto cuando pasas el ratón por encima de la tarjeta */
 .reto:hover .progress-bar-fill {
   filter: brightness(1.05);
 }
 
-/* Modificamos el hover que tenías del libro leyendo para que vaya a juego con el resto */
-.leyendo__libro:hover {
-  transform: scale(1.03);
+/* MIS LIBROS */
+.mis-libros-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(60, 21, 24, 0.08);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.mis-libros-card__titulo {
+  font-family: var(--font-titulos);
+  text-align: center;
+  color: var(--color-verde-oscuro);
+  font-size: 1.25rem;
+  font-weight: 700;
+  background-color: rgba(155, 196, 188, 0.18);
+  
+  margin-top: -1.5rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 16px 16px 0 0;
+}
+
+.mis-libros-card__btn-texto {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-verde-oscuro);
+  background-color: var(--color-amarillo);
+  padding: 6px 16px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+/* Efectos hover para ir a juego con el resto de la interfaz */
+.mis-libros-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: rgba(155, 196, 188, 0.5);
 }
