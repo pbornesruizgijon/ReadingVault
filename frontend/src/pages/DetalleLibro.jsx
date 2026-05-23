@@ -3,6 +3,35 @@ import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../assets/css/detalleLibro.css'; 
 
+// RENDERIZAR EL TEXTO DE LA RESEÑA CON "LEER MÁS"
+function TextoResenaTruncado({ texto }) {
+  const [expandido, setExpandido] = useState(false);
+  const limiteCaracteres = 500;
+
+  if (!texto) return null;
+
+  // Si el texto es corto, lo mostramos entero sin botones
+  if (texto.length <= limiteCaracteres) {
+    return <p className="mb-0">"{texto}"</p>;
+  }
+
+  // Si es largo, evaluamos si el usuario le ha dado a expandir
+  const textoMostrado = expandido ? texto : texto.substring(0, limiteCaracteres) + "...";
+
+  return (
+    <div className="detalle-texto-resena">
+      <p className="mb-1">"{textoMostrado}"</p>
+      <button 
+        className="p-0 border-0 bg-transparent text-primary small fw-bold" 
+        onClick={() => setExpandido(!expandido)}
+        style={{ fontSize: '0.85rem' }}
+      >
+        {expandido ? "Ver menos ▲" : "Leer más ▼"}
+      </button>
+    </div>
+  );
+}
+
 export default function DetalleLibro() {
   const { isbn } = useParams();
   const location = useLocation();
@@ -17,8 +46,8 @@ export default function DetalleLibro() {
   const [libro, setLibro] = useState(location.state?.libro || null);
   const [cargando, setCargando] = useState(!libro);
   const [sinopsisExpandida, setSinopsisExpandida] = useState(false);
-  const [showMenuVault, setShowMenuVault] = useState(false); // Estado para el menú desplegable
-  const [estanteriaActual, setEstanteriaActual] = useState(null); // Estado del Vault
+  const [showMenuVault, setShowMenuVault] = useState(false); 
+  const [estanteriaActual, setEstanteriaActual] = useState(null); 
   
   // Estados de interacción
   const [escribiendo, setEscribiendo] = useState(false);
@@ -26,6 +55,9 @@ export default function DetalleLibro() {
   const [resenasComunidad, setResenasComunidad] = useState([]);
   const [miVoto, setMiVoto] = useState(0);
   const [hoverVoto, setHoverVoto] = useState(0);
+
+  // Control de paginación de reseñas de la comunidad
+  const [limiteResenas, setLimiteResenas] = useState(5);
 
   const usuarioSesion = JSON.parse(localStorage.getItem("usuario"));
 
@@ -71,13 +103,10 @@ export default function DetalleLibro() {
       if (libroData) {
         setLibro(libroData); 
 
-        // Se ejecuta en segundo plano (sin 'await') para no frenar la carga de la pantalla
         if (libroData.isbn) {
           axios.post('http://localhost:8080/api/libros/sincronizar', libroData)
                .catch(err => console.log("El libro ya existe o hubo un fallo silencioso"));
         }
-        // ----------------------------------
-
       } else {
         libroData = libro;
       }
@@ -87,7 +116,6 @@ export default function DetalleLibro() {
         setResenasComunidad(resResenas.data || []);
 
         if (usuarioSesion) {
-          // Cargar voto y reseña
           try {
             const resVoto = await axios.get(
               `http://localhost:8080/api/reviews/usuario/${usuarioSesion.idUsuario}/libro/${libroData.idLibro}`
@@ -98,7 +126,6 @@ export default function DetalleLibro() {
             }
           } catch (e) { console.log("Sin voto previo"); }
 
-          // Cargar estado en el Vault (Biblioteca)
           try {
             const token = localStorage.getItem("token");
             const resVault = await axios.get(
@@ -164,7 +191,6 @@ export default function DetalleLibro() {
           }
         }
 
-        // Refrescamos toda la info de la pantalla para que los contadores visuales cambien al segundo
         await cargarDatosYVoto();
       }
     } catch (error) {
@@ -247,7 +273,11 @@ export default function DetalleLibro() {
   const descripcionCompleta = libro.descripcion || "Sin descripción disponible.";
   const sinopsisCorta = descripcionCompleta.length > 300 ? descripcionCompleta.substring(0, 300) + "..." : descripcionCompleta;
 
-return (
+  // Filtros de opinión
+  const opinionesDeOtros = resenasComunidad.filter(r => r.usuario.idUsuario !== usuarioSesion?.idUsuario && r.contenido);
+  const totalOpinionesConTexto = resenasComunidad.filter(r => r.contenido).length;
+
+  return (
     <>
       {mensaje.texto && (
         <div className={`vault-toast vault-toast--${mensaje.tipo}`}>
@@ -321,7 +351,7 @@ return (
                 <div className="small">
                   <strong>{(libro.valoracion || 0).toFixed(1)}</strong> / 5
                   <br />
-                  ({(libro.votos || 0).toLocaleString()} votos)
+                  (({(libro.votos || 0).toLocaleString()} votos))
                 </div>
               </div>
             </div>
@@ -330,8 +360,12 @@ return (
               <div className="detalle-card p-4 text-center">
                 <h1 className="detalle-titulo">{libro.titulo}</h1>
                 <h3 className="detalle-autor mb-4 text-muted">{libro.autor}</h3>
-                <p className="detalle-stats mb-0">
+                <p className="detalle-stats mb-3">
                   <strong>Páginas:</strong> {libro.paginas || 'N/A'} | <strong>Publicación:</strong> {libro.fechaPublicacion || 'Desconocida'}
+                </p>
+                <p className="mb-0 small text-muted">
+                  <strong>Géneros:</strong> {libro.generos || "General"} 
+                  {libro.isbn && <> | <strong>ISBN:</strong> {libro.isbn}</>}
                 </p>
               </div>
 
@@ -345,9 +379,6 @@ return (
                     {sinopsisExpandida ? "Ver menos ▲" : "Leer más ▼"}
                   </button>
                 )}
-                <hr />
-                <p className="mb-0"><strong>Géneros:</strong> {libro.generos || "General"}</p>
-                {libro.isbn && <p className="mt-2 small text-muted"><strong>ISBN:</strong> {libro.isbn}</p>}
               </div>
             </div>
           </div>
@@ -357,8 +388,7 @@ return (
       {/* --- SECCIÓN RESEÑAS --- */}
       <section className="detalle-reviews-bg py-5">
         <div className="container-custom" style={{ maxWidth: '900px' }}>
-          
-          {/* EDITOR INTEGRADO */}
+          {/* EDITOR */}
           {usuarioSesion && miVoto > 0 && (escribiendo || !resenasComunidad.some(r => r.usuario.idUsuario === usuarioSesion.idUsuario && r.contenido)) && (
             <div className="seccion-escribir-resena mb-5">
               <h4>{escribiendo ? "Actualizar mi opinión" : "Escribe una reseña"}</h4>
@@ -385,14 +415,12 @@ return (
           <h2 className="text-center mb-5 detalle-titulo-seccion">Valoraciones y reseñas</h2>
           
           <div className="d-flex flex-column gap-4">
-            
-            {/* 1. TU RESEÑA DESTACADA */}
+            {/* TU RESEÑA DESTACADA */}
             {resenasComunidad
               .filter(r => r.usuario.idUsuario === usuarioSesion?.idUsuario && r.contenido)
               .map(resena => (
                 !escribiendo && (
                   <div key={resena.idReview} className="review-card">
-                    
                     <div className="mis-acciones-review">
                         <button className="btn-accion-steam" onClick={() => setEscribiendo(true)} title="Editar">
                             <i className="bi bi-pencil-square"></i>
@@ -402,7 +430,6 @@ return (
                         </button>
                     </div>
 
-                    {/* Columna Usuario con LINK a tu propio perfil */}
                     <div className="review-user">
                       <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
                         <span className="badge-tu-resena mb-2 d-inline-block">Tú</span>
@@ -415,46 +442,49 @@ return (
                       </Link>
                     </div>
 
+                    {/* Aplicado componente de truncado para tu reseña */}
                     <div className="review-content">
                       <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
-                      <p className="mb-0">"{resena.contenido}"</p>
+                      <TextoResenaTruncado texto={resena.contenido} />
                       <small className="text-muted d-block mt-2">{resena.fecha}</small>
                     </div>
                   </div>
                 )
               ))}
 
-            {/* 2. RESEÑAS DE OTROS */}
-            {resenasComunidad
-              .filter(r => r.usuario.idUsuario !== usuarioSesion?.idUsuario && r.contenido)
-              .map((resena) => (
-                <div key={resena.idReview} className="review-card">
-                  
-                  {/* Columna Usuario con LINK al perfil dinámico */}
-                  <div className="review-user">
-                    <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
-                      {resena.usuario.fotoPerfil ? (
-                        <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar" />
-                      ) : (
-                        <div className="avatar-placeholder">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
-                      )}
-                      <h5>{resena.usuario.nombre}</h5>
-                    </Link>
-                  </div>
-
-                  <div className="review-content">
-                    <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
-                    <p className="mb-0">"{resena.contenido}"</p>
-                    <small className="text-muted d-block mt-2">{resena.fecha}</small>
-                  </div>
+            {/* RESEÑAS DE OTROS */}
+            {opinionesDeOtros.slice(0, limiteResenas).map((resena) => (
+              <div key={resena.idReview} className="review-card">
+                <div className="review-user">
+                  <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
+                    {resena.usuario.fotoPerfil ? (
+                      <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar" />
+                    ) : (
+                      <div className="avatar-placeholder">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
+                    )}
+                    <h5>{resena.usuario.nombre}</h5>
+                  </Link>
                 </div>
-              ))}
+
+                {/* Aplicado componente de truncado para las reseñas de los demás */}
+                <div className="review-content">
+                  <div className="estrellas mb-2">{renderEstrellas(resena.puntuacion)}</div>
+                  <TextoResenaTruncado texto={resena.contenido} />
+                  <small className="text-muted d-block mt-2">{resena.fecha}</small>
+                </div>
+              </div>
+            ))}
 
             {/* BOTÓN VER MÁS */}
-            {resenasComunidad.some(r => r.contenido) ? (
-              <button className="btn-ver-mas shadow-sm">Ver más</button>
+            {opinionesDeOtros.length > limiteResenas ? (
+              <button 
+                className="btn-ver-mas shadow-sm"
+                onClick={() => setLimiteResenas((prev) => prev + 5)}
+              >
+                Ver más
+              </button>
             ) : (
-              !escribiendo && (
+              totalOpinionesConTexto === 0 && !escribiendo && (
                 <div className="text-center p-5 bg-white rounded-pill shadow-sm">
                   <p className="text-muted mb-0">Nadie ha escrito una reseña todavía.</p>
                 </div>

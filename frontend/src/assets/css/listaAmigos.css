@@ -42,8 +42,8 @@
 }
 
 .nav-social-link.active {
-    background-color: var(--color-salmon);
-    color: white;
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
 }
 
 .btn-ver-perfil:hover{
@@ -124,16 +124,16 @@
 
 /* BOTÓN VOLVER AL PERFIL */
 .btn-volver-perfil {
-    background-color: var(--color-amarillo);
-    color: var(--color-verde-oscuro); 
+    background-color: var(--color-salmon);
+    color: #ffff; 
     border: none;
     font-weight: bold;
     transition: all 0.3s ease;
 }
 
 .btn-volver-perfil:hover {
-    background-color: var(--color-salmon);
-    color: white; 
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro); 
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(214, 122, 110, 0.3); 
 }

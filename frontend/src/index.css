@@ -17,7 +17,7 @@
   /* --- ASIGNACIÓN DE ROLES --- */
   --bg-pagina: var(--color-azul-claro);
   --bg-footer: var(--color-azul-footer);
-  --text-titulos: var(--color-marron-medio);
+  --text-titulos: var(--color-verde-oscuro);
   --text-body: var(--color-marron-medio);
   --accent: var(--color-salmon);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;

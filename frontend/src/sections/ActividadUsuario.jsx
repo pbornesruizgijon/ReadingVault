@@ -1,6 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Importamos Link
+import { Link } from "react-router-dom"; 
 import "../assets/css/actividadUsuario.css";
+
+// TRUNCAR LAS RESEÑAS CON "LEER MÁS"
+function TextoResenaTruncado({ texto }) {
+    const [expandido, setExpandido] = useState(false);
+    const limiteCaracteres = 500; // Límite idéntico al de la vista de detalle
+
+    if (!texto) return null;
+
+    // Si el texto es inferior al límite, se renderiza normal
+    if (texto.length <= limiteCaracteres) {
+        return <p className="resena-texto mb-0">"{texto}"</p>;
+    }
+
+    // Si supera el límite, calculamos el fragmento recortado
+    const textoMostrado = expandido ? texto : texto.substring(0, limiteCaracteres) + "...";
+
+    return (
+        <div className="perfil-texto-resena">
+            <p className="resena-texto mb-1">"{textoMostrado}"</p>
+            <button 
+                className="p-0 border-0 bg-transparent text-primary small fw-bold" 
+                onClick={() => setExpandido(!expandido)}
+                style={{ fontSize: '0.85rem' }}
+            >
+                {expandido ? "Ver menos ▲" : "Leer más ▼"}
+            </button>
+        </div>
+    );
+}
 
 export default function ActividadUsuario({ libros, idUsuario }) {
     const [resenas, setResenas] = useState([]);
@@ -42,7 +71,6 @@ export default function ActividadUsuario({ libros, idUsuario }) {
                 {libros && libros.length > 0 ? (
                     libros.map((item) => (
                         <div className="col-md-4" key={item.id}>
-                            {/* Envolvemos la card en un Link hacia la ruta de detalle */}
                             <Link 
                                 to={`/libro/${item.libro?.isbn}`} 
                                 state={{ libro: item.libro }} 
@@ -84,7 +112,6 @@ export default function ActividadUsuario({ libros, idUsuario }) {
                     <div key={r.idReview} className="list-group-item resena-item shadow-sm">
                         <div className="d-flex justify-content-between align-items-start">
                             <div>
-                                {/* También podemos hacer clicable el título en las reseñas */}
                                 <Link 
                                     to={`/libro/${r.libro?.isbn}`} 
                                     state={{ libro: r.libro }}
@@ -98,7 +125,7 @@ export default function ActividadUsuario({ libros, idUsuario }) {
                             </div>
                             <small className="text-muted fw-bold">{r.fecha}</small>
                         </div>
-                        <p className="resena-texto mb-0">"{r.contenido}"</p>
+                        <TextoResenaTruncado texto={r.contenido} />
                     </div>
                 ))}
             </div>

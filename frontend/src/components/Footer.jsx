@@ -40,15 +40,13 @@ export default function Footer() {
                             <div className="col-6 text-center text-md-start">
                                 <h4 className="footer__column-title">ReadingVault</h4>
                                 <ul className="footer__list">
-                                    <li><Link to="/buscador" className="footer__link">Libros</Link></li>
-                                    <li><Link to="/buscador" className="footer__link">Explorar</Link></li>
+                                    <li><Link to="/buscador" className="footer__link">Explorar libros</Link></li>
                                 </ul>
                             </div>
                             <div className="col-6 text-center text-md-start">
                                 <h4 className="footer__column-title">Comunidad</h4>
                                 <ul className="footer__list">
                                     <li><Link to="/comunidad" className="footer__link">Grupos de lectura</Link></li>
-                                    <li><Link to="/invitar" className="footer__link">Invitar a un amigo</Link></li>
                                 </ul>
                             </div>
                         </div>
@@ -57,14 +55,8 @@ export default function Footer() {
 
                 {/* LINEA Y LEGAL (ABAJO) */}
                 <hr className="footer__divider" />
-                <div className="row footer__bottom-row align-items-center">
-                    <div className="col-md-6 text-center text-md-start small">
-                        ©2026. Todos los derechos reservados
-                    </div>
-                    <div className="col-md-6 text-center text-md-end mt-2 mt-md-0 small">
-                        <Link to="/privacidad" className="footer__link d-inline me-3 opacity-75">Política de privacidad</Link>
-                        <Link to="/condiciones" className="footer__link d-inline opacity-75">Términos y condiciones</Link>
-                    </div>
+                <div className="row justify-content-center text-center footer__bottom-row derechos">
+                    ©2026. Todos los derechos reservados
                 </div>
             </div>
         </footer>

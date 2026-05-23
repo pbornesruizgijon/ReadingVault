@@ -12,7 +12,7 @@
 
 /* --- Tarjetas de Contenido --- */
 .detalle-card { background-color: var(--color-azul-footer); border-radius: 20px; color: #4a4a4a; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-.detalle-titulo { font-family: var(--font-titulos); font-size: 3rem; color: #3b4543; }
+.detalle-titulo { font-family: var(--font-titulos); font-size: 3rem; color: var(--color-verde-oscuro); }
 .detalle-autor { font-size: 1.8rem; font-weight: 300; color: #4a5754; }
 .detalle-stats { font-size: 0.95rem; color: #4a5754; }
 .detalle-texto { font-size: 1.05rem; line-height: 1.5; }
@@ -26,7 +26,7 @@
     cursor: pointer; box-shadow: var(--shadow); transition: all 0.3s ease; 
     display: flex; justify-content: center; align-items: center; 
 }
-.btn-add-vault:hover { filter: brightness(1.1); transform: scale(1.02); }
+.btn-add-vault:hover {  transform: scale(1.02); color: var(--color-verde-oscuro); background-color: var(--color-amarillo);}
 .btn-add-vault--pendiente { background-color: #dbb646 !important; }
 .btn-add-vault--leyendo { background-color: #5d8cca !important; }
 .btn-add-vault--leido { background-color: #68c768 !important; }
@@ -124,8 +124,8 @@
 
 /* BOTÓN VER MÁS AL FINAL */
 .btn-ver-mas {
-    background-color: var(--color-amarillo);
-    color: var(--color-marron-oscuro);
+    background-color: var(--color-salmon);
+    color: #ffffff;
     border: none;
     padding: 12px 45px;
     border-radius: 25px;
@@ -137,6 +137,6 @@
     transition: all 0.3s ease;
 }
 
-.btn-ver-mas:hover { filter: brightness(1.1); transform: scale(1.05); }
+.btn-ver-mas:hover { filter: brightness(1.1); transform: scale(1.05); background-color: var(--color-amarillo); color: var(--color-verde-oscuro);}
 
 @keyframes fadeInSlide { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }

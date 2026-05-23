@@ -28,14 +28,10 @@
   font-weight: 700;
   background-color: rgba(155, 196, 188, 0.18);
   text-align: center;
-  
-  /* Rompen el padding de la tarjeta para ocupar todo el ancho */
   margin-top: -1.5rem;
   margin-left: -1.5rem;
   margin-right: -1.5rem;
   margin-bottom: 1.5rem;
-  
-  /* Padding interno para centrar y dar aire al texto */
   padding: 1rem 1.5rem;
   border-radius: 16px 16px 0 0;
   border-bottom: none;
@@ -55,10 +51,6 @@
   box-shadow: var(--shadow);
   border: 1px solid rgba(60, 21, 24, 0.08);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.leyendo:hover{
-  transform: scale(1.03);
 }
 
 /* Modificado para soportar la reorientación vertical del JSX */
@@ -372,19 +364,6 @@
   color: var(--color-verde-oscuro);
 }
 
-/* INTERACCIONES Y EFECTOS HOVER */
-.reto:hover, 
-.recomendacion:hover, 
-.libroAño:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-  border-color: rgba(155, 196, 188, 0.5);
-}
-
-.reto:hover .progress-bar-fill {
-  filter: brightness(1.05);
-}
-
 /* MIS LIBROS */
 .mis-libros-card {
   background-color: #ffffff;
@@ -423,9 +402,17 @@
   display: inline-block;
 }
 
-/* Efectos hover para ir a juego con el resto de la interfaz */
+/* INTERACCIONES Y EFECTOS HOVER */
+.leyendo:hover,
+.reto:hover, 
+.recomendacion:hover, 
+.libroAño:hover,
 .mis-libros-card:hover {
   transform: translateY(-4px) scale(1.01);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   border-color: rgba(155, 196, 188, 0.5);
+}
+
+.reto:hover .progress-bar-fill {
+  filter: brightness(1.05);
 }

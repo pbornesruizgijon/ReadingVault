@@ -1,5 +1,3 @@
-/* src/assets/css/footer.css */
-
 .footer-custom {
     background-color: var(--color-azul-footer);
     color: var(--text-body);
@@ -24,7 +22,7 @@
 }
 
 .footer__link {
-    color: var(--text-body);
+    color: var(--color-verde-oscuro);
     text-decoration: none;
     display: block; 
     margin-bottom: 12px; 
@@ -35,6 +33,16 @@
 .footer__link:hover {
     color: var(--color-amarillo);
     transform: translateX(3px);
+}
+
+.slogan__descripcion{
+    color: var(--color-verde-oscuro);
+}
+
+/* Forzamos el ancho completo para asegurar el centrado del texto en el eje */
+.derechos {
+    text-align: center;
+    width: 100%;
 }
 
 /* Logo circular central */
@@ -63,7 +71,7 @@
     height: 40px;
     border-radius: 50%;
     background-color: var(--color-salmon);
-    color: white !important;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -75,9 +83,9 @@
 
 .footer__social-icon:hover {
     transform: translateY(-5px); 
-    background-color: var(--color-verde-oscuro);
+    background-color: var(--color-amarillo);
     box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-    color: #fff;
+    color: var(--color-verde-oscuro);
 }
 
 /* Línea divisoria inferior */
