@@ -173,7 +173,7 @@
 }
 
 .noticias__bienvenida {
-  background-color: var(--color-verde-oscuro);
+  background-color: var(--color-azul-footer);
   color: #ffffff;
   padding: 2rem;
   border-radius: 18px;
@@ -182,16 +182,22 @@
 }
 
 .bienvenida__titulo {
-  color: var(--color-amarillo);
+  color: var(--color-verde-oscuro);
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .bienvenida__texto {
-  font-family: var(--font-body);
+  font-family: var(--color-verde-oscuro);
   margin: 0;
   opacity: 0.9;
   font-size: 0.95rem;
+}
+
+.bienvenida__titulo--verde{
+  color: var(--color-amarillo);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .noticias__titulo {

@@ -20,6 +20,7 @@ import com.readingvault.models.Usuario;
 import com.readingvault.repositories.LibroRepository;
 import com.readingvault.repositories.ReviewRepository;
 import com.readingvault.repositories.UsuarioRepository;
+import com.readingvault.services.AmistadService;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -34,6 +35,9 @@ public class ReviewController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private AmistadService amistadService;
 
     @PostMapping("/votar")
     public ResponseEntity<?> registrarVoto(@RequestBody Map<String, Object> payload) {
@@ -185,28 +189,78 @@ public class ReviewController {
     // Obtiene una recomendación aleatoria de 5 estrellas de un amigo
     @GetMapping("/recomendacion-amigo/{idUsuario}")
     public ResponseEntity<?> obtenerRecomendacionAmigo(@PathVariable Long idUsuario) {
-        // Buscamos todas las reviews con la nota máxima (5)
-        List<Review> reviewsPerfectas = reviewRepository.findByPuntuacion(5);
+        
+        // Obtenemos los amigos confirmados del usuario
+        List<Usuario> misAmigos = amistadService.obtenerListaAmigos(idUsuario);
 
-        // Filtramos para quedarnos solo con las de otros usuarios (tus amigos)
-        List<Review> deAmigos = reviewsPerfectas.stream()
-                .filter(r -> r.getUsuario() != null && !r.getUsuario().getIdUsuario().equals(idUsuario))
-                .collect(java.util.stream.Collectors.toList());
-
-        if (deAmigos.isEmpty()) {
-            // Si no hay reviews de amigos, mandamos un 404 para que el Front active el Plan B
+        // Si el usuario es nuevo y no tiene amigos, cortamos aquí y mandamos al Frontend al Plan B
+        if (misAmigos == null || misAmigos.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        // Barajamos la lista para que la recomendación cambie al recargar la página
+        // Extraemos solo los IDs de los amigos para filtrar rápido
+        List<Long> idsAmigos = misAmigos.stream()
+                .map(Usuario::getIdUsuario)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Buscamos todas las reviews con la nota máxima (4 o 5, lo que prefieras)
+        List<Review> reviewsPerfectas = reviewRepository.findByPuntuacion(5);
+
+        // Filtramos para quedarnos SOLO con las reviews de la lista de mis amigos
+        List<Review> deAmigos = reviewsPerfectas.stream()
+                .filter(r -> r.getUsuario() != null && idsAmigos.contains(r.getUsuario().getIdUsuario()))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (deAmigos.isEmpty()) {
+            // Si tienes amigos pero ninguno ha dado 5 estrellas a nada, activamos Plan B
+            return ResponseEntity.notFound().build();
+        }
+
+        // Barajamos la lista para dar una recomendación aleatoria
         java.util.Collections.shuffle(deAmigos);
         Review reviewGanadora = deAmigos.get(0);
 
-        // Devolvemos un mapa limpio con el libro y el nombre del amigo que lo reseñó
+        // Devolvemos la información limpia
         return ResponseEntity.ok(Map.of(
             "libro", reviewGanadora.getLibro(),
-            "nombreAmigo", reviewGanadora.getUsuario().getNombre()
+            "nombreAmigo", reviewGanadora.getUsuario().getNombreUsuario() 
         ));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> crearReviewDesdeProgreso(@RequestBody Map<String, Object> payload) {
+        try {
+            // Extraemos los IDs y datos del JSON del Frontend
+            Long idUsuario = Long.valueOf(payload.get("idUsuario").toString());
+            Long idLibro = Long.valueOf(payload.get("idLibro").toString());
+            Integer estrellas = Integer.valueOf(payload.get("puntuacion").toString());
+            String comentario = (String) payload.get("comentario");
+
+            // Buscamos las entidades en la BD para asegurar las relaciones de la tabla cruzada
+            var usuario = usuarioRepository.findById(idUsuario).orElse(null);
+            var libro = libroRepository.findById(idLibro).orElse(null);
+
+            if (usuario == null || libro == null) {
+                return ResponseEntity.badRequest().body("Error: Usuario o Libro no localizados en el sistema.");
+            }
+
+            // Creamos y rellenamos la nueva entidad Review
+            Review nuevaReview = new Review();
+            nuevaReview.setUsuario(usuario);
+            nuevaReview.setLibro(libro);
+            nuevaReview.setPuntuacion(estrellas);
+            //nuevaReview.setComentario(comentario);
+            
+            // Si vuestra entidad guarda la fecha de la reseña, descomenta esta línea:
+            // nuevaReview.setFecha(java.time.LocalDateTime.now());
+
+            reviewRepository.save(nuevaReview);
+
+            return ResponseEntity.ok().build();
+            
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al procesar la valoración: " + e.getMessage());
+        }
     }
 
 }

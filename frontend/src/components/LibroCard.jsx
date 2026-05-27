@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2'
 import "../assets/css/libroCard.css";
 
 const LibroCard = ({ libro }) => {
@@ -48,9 +49,17 @@ const LibroCard = ({ libro }) => {
     setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
   };
 
-  const añadirABiblioteca = async (nombreEstanteria) => {
+const añadirABiblioteca = async (nombreEstanteria) => {
     if (!usuarioSesion) {
-      alert("Debes iniciar sesión.");
+      // Sustituimos el alert por un SweetAlert chulo
+      Swal.fire({
+        title: '¡Ups!',
+        text: 'Debes iniciar sesión para añadir libros a tu biblioteca.',
+        icon: 'warning',
+        confirmButtonColor: '#4B5043',
+        confirmButtonText: 'Entendido',
+        borderRadius: '15px'
+      });
       return;
     }
 

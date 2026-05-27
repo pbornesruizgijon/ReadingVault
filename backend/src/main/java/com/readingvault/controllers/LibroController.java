@@ -94,7 +94,17 @@ public class LibroController {
                 ? String.join(", ", libroExt.getCategories()) : "General";
         respuesta.put("generos", categoriasStr);
 
-        Optional<Libro> localOpt = libroRepository.findByIsbn(isbn);
+        
+        Optional<Libro> localOpt = Optional.empty();
+        if (isbn != null && !isbn.trim().isEmpty()) {
+            try {
+                localOpt = libroRepository.findByIsbn(isbn);
+            } catch (org.springframework.dao.IncorrectResultSizeDataAccessException | org.hibernate.NonUniqueResultException e) {
+                // Por si acaso hay varios libros con el mismo ISBN duplicado por error
+                System.out.println("Aviso: ISBN duplicado encontrado en BD: " + isbn);
+            }
+        }
+
         if (localOpt.isPresent()) {
             Libro local = localOpt.get();
             respuesta.put("valoracion", local.getValoracion());
@@ -187,7 +197,7 @@ public class LibroController {
         return ResponseEntity.notFound().build();
     }
 
-    // Endpoint silencioso para asegurar que un libro visto exista en BD y actualizar datos faltantes
+    // Endpoint para asegurar que un libro visto exista en BD y actualizar datos faltantes
     @PostMapping("/sincronizar")
     public ResponseEntity<?> sincronizarLibroLocal(@RequestBody Map<String, Object> libroData) {
         String isbn = (String) libroData.get("isbn");
@@ -198,13 +208,27 @@ public class LibroController {
             return ResponseEntity.badRequest().build();
         }
 
-        // Buscar si ya existe por ISBN o por Título y Autor
         Optional<Libro> existe = Optional.empty();
-        if (isbn != null && !isbn.isEmpty()) {
-            existe = libroRepository.findByIsbn(isbn);
-        }
-        if (existe.isEmpty()) {
-            existe = libroRepository.findByTituloAndAutor(titulo, autor);
+        
+        try {
+            // Intentamos buscar por ISBN (si lo hay)
+            if (isbn != null && !isbn.trim().isEmpty()) {
+                existe = libroRepository.findByIsbn(isbn);
+            }
+            
+            // Si no hay ISBN o no se encontró, buscamos por Título y Autor
+            if (existe.isEmpty() && !titulo.trim().isEmpty() && !autor.trim().isEmpty()) {
+                existe = libroRepository.findByTituloAndAutor(titulo, autor);
+            }
+            
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException | org.hibernate.NonUniqueResultException e) {
+            // Si hay múltiples libros idénticos en BD (por ejemplo, 12 sin ISBN),
+            // cazamos el error para que la app no explote.
+            // Cogemos el primero que devuelva una búsqueda en lista:
+            List<Libro> duplicados = libroRepository.findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCaseOrGenerosContainingIgnoreCase(titulo, autor, "");
+            if (!duplicados.isEmpty()) {
+                existe = Optional.of(duplicados.get(0));
+            }
         }
         
         if (existe.isEmpty()) {
@@ -242,7 +266,7 @@ public class LibroController {
                 necesitaActualizar = true;
             }
 
-            // Si le faltaba algo, guardamos los cambios silenciosamente
+            // Si le faltaba algo, guardamos los cambios 
             if (necesitaActualizar) {
                 libroRepository.save(libroGuardado);
             }
