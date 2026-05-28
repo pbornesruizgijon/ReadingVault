@@ -8,7 +8,6 @@ const Reto = () => {
     leidos: 0,
     objetivo: 0,
     paginasTotales: 0,
-    diasSeguidos: 0,
   });
   const [librosPendientes, setLibrosPendientes] = useState([]);
   const [librosLeyendo, setLibrosLeyendo] = useState([]);
@@ -53,7 +52,6 @@ const Reto = () => {
                 leidos: librosLeidos.length,
                 paginasTotales: sumaPaginas,
                 objetivo: retoData.objetivoLibros || 0, 
-                diasSeguidos: sesion?.rachaActual || 0,
               });
             });
         })
@@ -222,15 +220,7 @@ const Reto = () => {
 
               <div className="reto-card__body flex-column align-items-center">
                 <div className="stats-mini-grid">
-                  <div className="stat-item">
-                    <span
-                      className="stat-value"
-                      style={{ color: "var(--color-amarillo)" }}
-                    >
-                      {datosReto.diasSeguidos}🔥
-                    </span>
-                    <span className="stat-label">Días racha</span>
-                  </div>
+                  {/* Leídos */}
                   <div className="stat-item">
                     <span
                       className="stat-value"
@@ -240,15 +230,34 @@ const Reto = () => {
                     </span>
                     <span className="stat-label">Leídos</span>
                   </div>
+                  {/* Pendientes */}
                   <div className="stat-item">
                     <span className="stat-value">
                       {librosPendientes.length}
                     </span>
                     <span className="stat-label">Pendientes</span>
                   </div>
+                  {/* Leyendo */}
                   <div className="stat-item">
                     <span className="stat-value">{librosLeyendo.length}</span>
                     <span className="stat-label">Leyendo</span>
+                  </div>
+                  <div className="stat-item">
+                    <i className="bi bi-book-half" style={{ fontSize: "2rem", color: "var(--color-verde-oscuro)" }}></i>
+                    <span className="stat-label mt-2" style={{ fontWeight: "800", fontSize: "0.85rem" }}>
+                      <span style={{ 
+                        color: "var(--color-verde-oscuro)", 
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.2)" 
+                      }}>
+                        Reading
+                      </span>
+                      <span style={{ 
+                        color: "var(--color-amarillo)", 
+                        textShadow: "1px 1px 3px rgb(0, 0, 0)" // Sombra un poco más marcada para el amarillo
+                      }}>
+                        Vault
+                      </span>
+                    </span>
                   </div>
                 </div>
 

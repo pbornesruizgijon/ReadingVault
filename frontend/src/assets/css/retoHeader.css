@@ -207,3 +207,13 @@
 .reto-card.pagina-pasada::after {
   display: none;
 }
+
+.bi-book-half {
+  display: inline-block;
+  animation: balanceo 3s infinite ease-in-out;
+}
+
+@keyframes balanceo {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
