@@ -96,7 +96,12 @@ export default function TusAmigos() {
       },
     );
 
-    if (res.ok) cargarDatosSociales();
+    if (res.ok){
+      setPendientes(pendientes.filter(sol => sol.id !== id));
+    if (accion === "aceptar") {
+        cargarDatosSociales();
+      }
+    }
   };
 
   const amigosFiltrados = amigos.filter((a) =>
@@ -194,19 +199,29 @@ export default function TusAmigos() {
                           Te envió una solicitud
                         </span>
                       </div>
-                      <div className="d-flex gap-2">
+                      <div className="d-flex gap-2 align-items-center" style={{ whiteSpace: 'nowrap' }}>
+                        {/* Botón Aceptar */}
                         <button
                           className="btn-add-vault btn-add-vault--leido py-1 px-3"
                           onClick={() => gestionarAccion(sol.id, "aceptar")}
                         >
                           Aceptar
                         </button>
+                        {/* Botón Ignorar */}
                         <button
-                          className="btn btn-outline-secondary rounded-pill btn-sm"
+                          className="btn btn-outline-secondary rounded-pill btn-sm py-1 px-3"
                           onClick={() => gestionarAccion(sol.id, "rechazar")}
                         >
                           Ignorar
                         </button>
+                        {/* Botón Ver Perfil */}
+                        <Link
+                          to={`/perfil/${sol.usuario1.idUsuario}`}
+                          className="btn-add-vault btn-ver-perfil py-1 px-3"
+                          style={{ textDecoration: 'none', width: 'auto' }}
+                        >
+                          Ver Perfil
+                        </Link>
                       </div>
                     </div>
                   ))
