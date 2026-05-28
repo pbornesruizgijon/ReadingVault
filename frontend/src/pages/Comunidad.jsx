@@ -196,12 +196,14 @@ export default function Comunidad() {
                 <div key={user.idUsuario || user.id} className="col-md-6 col-lg-3">
                   <div className="comunidad-card h-100 p-4 text-center d-flex flex-column align-items-center">
                     <img 
-                      /* Generamos el avatar con nombre_usuario */
-                      src={user.fotoPerfil || "https://ui-avatars.com/api/?name=" + user.nombre_usuario} 
-                      alt={user.nombre_usuario} 
+                      /* Aplicamos la misma validación estricta que en las reseñas */
+                      src={(user.fotoPerfil && user.fotoPerfil !== "null" && user.fotoPerfil.trim() !== "") 
+                            ? user.fotoPerfil 
+                            : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+                      alt={user.nombreUsuario} 
                       className="usuario-avatar mb-3 shadow-sm" 
                     />
-                    {/* Mostramos el nombre_usuario */}
+                    {/* Mostramos el nombreUsuario */}
                     <h5 className="fw-bold mb-1">{user.nombreUsuario}</h5>
                     
                     <div className="d-flex gap-3 text-muted small mt-auto">

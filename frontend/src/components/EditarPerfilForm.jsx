@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import AvatarEditor from "react-avatar-editor";
+import Swal from 'sweetalert2';
 import "../assets/css/ajustes.css"; 
 
 export default function EditarPerfilForm({ user }) {
@@ -103,8 +104,23 @@ export default function EditarPerfilForm({ user }) {
   };
 
   const handleEliminarFoto = async () => {
-    if (!window.confirm("¿Estás seguro de que quieres eliminar tu foto de perfil?")) return;
+    // Lanzamos el SweetAlert pidiendo confirmación
+    const confirmacion = await Swal.fire({
+      title: '¿Eliminar foto?',
+      text: "¿Estás seguro de que quieres quitar tu foto de perfil?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33', 
+      cancelButtonColor: '#4B5043', 
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      borderRadius: '15px'
+    });
+
+    // Si el usuario cierra el modal o le da a cancelar, cortamos la función aquí
+    if (!confirmacion.isConfirmed) return;
     
+    // Si ha dicho que sí, ejecutamos el borrado
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(`http://localhost:8080/api/usuarios/${user.idUsuario}/eliminar-foto`, {

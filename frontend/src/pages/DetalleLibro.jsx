@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import '../assets/css/detalleLibro.css'; 
 
 // RENDERIZAR EL TEXTO DE LA RESEÑA CON "LEER MÁS"
@@ -79,18 +80,41 @@ export default function DetalleLibro() {
   };
 
   const borrarResena = async () => {
+    // Lanzamos el SweetAlert para frenar al usuario y pedir confirmación
+    const confirmacion = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Vas a eliminar tu reseña de forma permanente y no podrás recuperarla.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33', // Rojo para la acción de borrar
+      cancelButtonColor: '#4B5043', // Verde para cancelar
+      confirmButtonText: 'Sí, borrar',
+      cancelButtonText: 'Cancelar',
+      borderRadius: '15px'
+    });
+
+    // Si el usuario cancela o cierra la ventana, cortamos la función
+    if (!confirmacion.isConfirmed) return;
+
+    // Si ha confirmado, procedemos a borrar
     try {
       await axios.post('http://localhost:8080/api/reviews/borrar-comentario', {
         idUsuario: usuarioSesion.idUsuario,
         idLibro: libro.idLibro
       });
+      
       setTextoResena("");
-      mostrarNotificacion("Reseña eliminada", "success");
       cargarDatosYVoto();
+      
+      // Lanzamos tu Toast verde silencioso para confirmar el éxito
+      mostrarNotificacion("Reseña eliminada", "success");
+      
     } catch (err) {
-      mostrarNotificacion("Error al borrar", "error");
+      // O el Toast rojo si algo falla en el backend
+      mostrarNotificacion("Error al borrar la reseña", "error");
     }
   };
+
 
   const cargarDatosYVoto = async () => {
     try {
@@ -433,11 +457,13 @@ export default function DetalleLibro() {
                     <div className="review-user">
                       <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
                         <span className="badge-tu-resena mb-2 d-inline-block">Tú</span>
-                        {resena.usuario.fotoPerfil ? (
-                          <img src={resena.usuario.fotoPerfil} alt="Tú" className="review-avatar" />
-                        ) : (
-                          <div className="avatar-placeholder">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
-                        )}
+                        <img 
+                          src={(resena.usuario.fotoPerfil && resena.usuario.fotoPerfil !== "null" && resena.usuario.fotoPerfil.trim() !== "") 
+                                ? resena.usuario.fotoPerfil 
+                                : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+                          alt="Tú" 
+                          className="review-avatar" 
+                        />
                         <h5>{resena.usuario.nombre}</h5>
                       </Link>
                     </div>
@@ -457,11 +483,13 @@ export default function DetalleLibro() {
               <div key={resena.idReview} className="review-card">
                 <div className="review-user">
                   <Link to={`/perfil/${resena.usuario.idUsuario}`} className="review-user-link">
-                    {resena.usuario.fotoPerfil ? (
-                      <img src={resena.usuario.fotoPerfil} alt={resena.usuario.nombre} className="review-avatar" />
-                    ) : (
-                      <div className="avatar-placeholder">{resena.usuario.nombre.charAt(0).toUpperCase()}</div>
-                    )}
+                    <img 
+                      src={(resena.usuario.fotoPerfil && resena.usuario.fotoPerfil !== "null" && resena.usuario.fotoPerfil.trim() !== "") 
+                            ? resena.usuario.fotoPerfil 
+                            : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+                      alt={resena.usuario.nombre} 
+                      className="review-avatar" 
+                    />
                     <h5>{resena.usuario.nombre}</h5>
                   </Link>
                 </div>
