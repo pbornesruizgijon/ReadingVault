@@ -29,7 +29,25 @@ export default function AjustesCuenta() {
     }
   }, []);
 
-  if (!usuario) return <div className="container p-5">Cargando tus ajustes...</div>;
+  if (!usuario) {
+    return (
+      <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "60vh" }}>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Cargando tus ajustes...</h4>
+      </div>
+    );
+  }
 
   return (
     <main className="container-custom py-5">

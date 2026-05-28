@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.readingvault.models.Libro;
@@ -34,5 +35,9 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
     Optional<Libro> findFirstByOrderByIdLibroDesc();
 
     Optional<Libro> findFirstByTituloAndAutor(String titulo, String autor);
+
+    // Consulta para sacar 1 libro aleatorio con buena nota
+    @Query(value = "SELECT * FROM libro WHERE valoracion >= 4 ORDER BY RAND() LIMIT 1", nativeQuery = true)
+    Optional<Libro> findRecomendacionAleatoriaVault();
 
 }

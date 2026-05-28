@@ -291,8 +291,35 @@ export default function DetalleLibro() {
     return ""; 
   };
 
-  if (cargando) return <div className="text-center py-5"><h3>Cargando sabiduría...</h3></div>;
-  if (!libro) return null;
+  if (cargando) {
+    return (
+      <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "60vh" }}>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Cargando libro...</h4>
+      </div>
+    );
+  }
+
+  if (!libro) {
+    return (
+      <div className="text-center w-100 py-5" style={{ minHeight: "60vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <i className="bi bi-exclamation-circle display-1 text-muted mb-3 opacity-50"></i>
+        <h4 className="text-muted fw-bold">Libro no encontrado</h4>
+        <p className="text-muted">El libro que buscas no existe o ha sido eliminado.</p>
+      </div>
+    );
+  }
 
   const descripcionCompleta = libro.descripcion || "Sin descripción disponible.";
   const sinopsisCorta = descripcionCompleta.length > 300 ? descripcionCompleta.substring(0, 300) + "..." : descripcionCompleta;

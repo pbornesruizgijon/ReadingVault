@@ -8,6 +8,8 @@ const MisLibros = () => {
   const [biblioteca, setBiblioteca] = useState([]);
   const [vista, setVista] = useState("todas");
 
+  const [cargando, setCargando] = useState(true);
+
   // Estados para la paginación
   const [paginaActual, setPaginaActual] = useState(1);
   const librosPorPagina = 9;
@@ -24,10 +26,15 @@ const MisLibros = () => {
   }, [vista, paginaActual]);
 
   const cargarDatos = async () => {
+    
+    setCargando(true); 
     const sesion = JSON.parse(localStorage.getItem("usuario"));
     const token = localStorage.getItem("token");
+    
     if (sesion && token) {
       try {
+        //await new Promise(resolve => setTimeout(resolve, 3000));
+        
         const response = await fetch(
           `http://localhost:8080/api/bibliotecas/usuario/${sesion.idUsuario}/completa`,
           {
@@ -38,7 +45,11 @@ const MisLibros = () => {
         setBiblioteca(data);
       } catch (error) {
         console.error("Error:", error);
+      } finally {
+        setCargando(false);
       }
+    } else {
+      setCargando(false);
     }
   };
 
@@ -51,6 +62,26 @@ const MisLibros = () => {
   const ultimoIndice = paginaActual * librosPorPagina;
   const primerIndice = ultimoIndice - librosPorPagina;
   const librosPaginados = librosFiltrados.slice(primerIndice, ultimoIndice);
+
+  if (cargando) {
+    return (
+      <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "80vh" }}>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Desempolvando tus estanterías...</h4>
+      </div>
+    );
+  }
 
   return (
     <div className="biblioteca-layout container-custom">

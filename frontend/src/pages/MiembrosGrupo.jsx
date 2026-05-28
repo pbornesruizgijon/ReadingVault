@@ -112,7 +112,25 @@ export default function MiembrosGrupo() {
     m?.usuario?.nombreUsuario?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  if (cargando) return <div className="tus-amigos-bg py-5 text-center text-muted">Cargando lista de lectores...</div>;
+  if (cargando) {
+    return (
+      <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "80vh" }}>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Cargando lista lectores...</h4>
+      </div>
+    );
+  }
 
   return (
     <div className="tus-amigos-bg py-5">

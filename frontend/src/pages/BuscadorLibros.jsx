@@ -91,7 +91,7 @@ const BuscadorLibros = () => {
       console.error("Error al obtener libros:", error);
       setLibros([]);
     } finally {
-      // --- DESACTIVAMOS EL SPINNER (tanto si sale bien como si da error) ---
+      
       setCargando(false);
     }
   };

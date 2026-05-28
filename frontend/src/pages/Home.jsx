@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import NoticiaCard from "../components/NoticiaCard";
 import CrearNoticiaAdmin from "../components/CrearNoticiaAdmin";
 import "../assets/css/home.css";
@@ -15,12 +15,12 @@ export default function Home() {
 
   // --- ESTADOS COLUMNA CENTRAL ---
   const [librosNoticias, setLibrosNoticias] = useState([]);
-  const [limiteNoticias, setLimiteNoticias] = useState(3); 
+  const [limiteNoticias, setLimiteNoticias] = useState(3);
   const [cargandoCentro, setCargandoCentro] = useState(true);
 
   // --- ESTADOS COLUMNA DERECHA ---
   const [libroAmigo, setLibroAmigo] = useState(null);
-  const [nombreRecomendador, setNombreRecomendador] = useState("ReadingVault"); 
+  const [nombreRecomendador, setNombreRecomendador] = useState("ReadingVault");
   const [libroAnio, setLibroAnio] = useState(null);
   const [cargandoDerecha, setCargandoDerecha] = useState(true);
 
@@ -37,7 +37,10 @@ export default function Home() {
   const sesion = localStorage.getItem("usuario");
   const token = localStorage.getItem("token");
   const miSesion = sesion ? JSON.parse(sesion) : null;
-  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
 
   // Comprobación de privilegios de administrador
   const esAdmin = miSesion?.rol === "ADMIN";
@@ -47,7 +50,7 @@ export default function Home() {
     fetch("http://localhost:8080/api/noticias", { headers })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
-        setLibrosNoticias(data); 
+        setLibrosNoticias(data);
         setCargandoCentro(false);
       })
       .catch((err) => {
@@ -77,23 +80,37 @@ export default function Home() {
     }
 
     // 1. CARGA COLUMNA IZQUIERDA: Progreso de lectura y Reto Anual seguro
-    fetch(`http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`, { headers })
+    fetch(
+      `http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`,
+      { headers },
+    )
       .then((res) => (res.ok ? res.json() : []))
       .then((items) => {
-        const actualmenteLeyendo = items.filter((i) => i.estanteria?.nombre === "Leyendo");
+        const actualmenteLeyendo = items.filter(
+          (i) => i.estanteria?.nombre === "Leyendo",
+        );
         setLibrosLeyendo(actualmenteLeyendo);
         setIndiceLibro(0);
 
-        const totalLeidosManual = items.filter((i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO").length;
+        const totalLeidosManual = items.filter(
+          (i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO",
+        ).length;
 
-        return fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}/actual`, { headers })
+        return fetch(
+          `http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}/actual`,
+          { headers },
+        )
           .then((resReto) => {
-            if (!resReto.ok) throw new Error("Reto no creado en base de datos todavía");
+            if (!resReto.ok)
+              throw new Error("Reto no creado en base de datos todavía");
             return resReto.json();
           })
           .then((retoData) => {
             setStats({
-              leidos: retoData.completados !== undefined ? retoData.completados : totalLeidosManual,
+              leidos:
+                retoData.completados !== undefined
+                  ? retoData.completados
+                  : totalLeidosManual,
               objetivoReto: retoData.objetivoLibros || 0,
             });
             setCargandoIzquierda(false);
@@ -115,82 +132,72 @@ export default function Home() {
     cargarNoticiasReales();
 
     // 3. MOTOR DE RECOMENDACIONES: Llamada limpia al método específico del backend
-fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuario}`, { headers })
-  .then((res) => {
-    if (!res.ok) throw new Error("Sin recomendaciones de amigos");
-    return res.json();
-  })
-  .then((data) => {
-    setLibroAmigo({
-      isbn: data.libro.isbn,
-      titulo: data.libro.titulo,
-      autor: data.libro.autor,
-      portada: data.libro.fotoPortada || data.libro.portada
-    });
-    setNombreRecomendador(`tu amigo ${data.nombreAmigo || "un amigo"}`);
-  })
-  .catch(() => {
-    // Entra ReadingVault
-    fetch("http://localhost:8080/api/libros/buscar?q=libros&isGenero=false", { headers })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((respuestaServidor) => {
-        // Nos aseguramos de que es un Array sí o sí (por si Spring pagina los resultados)
-        const todosLosLibros = Array.isArray(respuestaServidor) 
-            ? respuestaServidor 
-            : (respuestaServidor.content || []);
-
-        if (todosLosLibros.length === 0) {
-            setLibroAmigo(null);
-            return;
-        }
-
-        const buenosGlobales = todosLosLibros.filter(l => (l.puntuacionMedia || l.valoracion || 0) >= 4);
-        const poolSeleccion = buenosGlobales.length > 0 ? buenosGlobales : todosLosLibros;
-        const aleatorioGlobal = [...poolSeleccion].sort(() => 0.5 - Math.random())[0];
-        
-        //  Mapeamos el objeto exactamente igual que el del amigo
-        setLibroAmigo({
-          isbn: aleatorioGlobal.isbn,
-          titulo: aleatorioGlobal.titulo,
-          autor: aleatorioGlobal.autor,
-          portada: aleatorioGlobal.fotoPortada || aleatorioGlobal.portada
-        });
-        setNombreRecomendador("ReadingVault");
+    fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuario}`, { headers })
+      .then((res) => {
+        if (!res.ok) throw new Error("Sin recomendaciones de amigos");
+        return res.json();
       })
-      .catch((err) => {
-          console.error("Error cargando el libro de ReadingVault:", err);
-          setLibroAmigo(null);
+      .then((data) => {
+        setLibroAmigo({
+          isbn: data.libro.isbn,
+          titulo: data.libro.titulo,
+          autor: data.libro.autor,
+          portada: data.libro.fotoPortada || data.libro.portada,
+        });
+        setNombreRecomendador(`tu amigo ${data.nombreAmigo || "un amigo"}`);
+      })
+      .catch(() => {
+        // --- Entra ReadingVault (VERSIÓN OPTIMIZADA) ---
+        fetch("http://localhost:8080/api/libros/recomendacion-aleatoria", { headers })
+          .then((res) => {
+            if (!res.ok) throw new Error("No hay libros destacados en el servidor");
+            return res.json();
+          })
+          .then((libroOptimo) => {
+            setLibroAmigo({
+              isbn: libroOptimo.isbn,
+              titulo: libroOptimo.titulo,
+              autor: libroOptimo.autor,
+              portada: libroOptimo.fotoPortada || libroOptimo.portada,
+            });
+            setNombreRecomendador("ReadingVault");
+          })
+          .catch((err) => {
+            console.error("Error cargando la recomendación del sistema:", err);
+            setLibroAmigo(null);
+          });
+      })
+      .finally(() => {
+        setCargandoDerecha(false);
       });
-  })
-  .finally(() => {
-    setCargandoDerecha(false);
-  });
 
     // 4. CARGA COLUMNA DERECHA: Libro del año
     cargarLibroDelAnioFijo();
-
   }, [navigate]);
 
   // MANEJADOR EXCLUSIVO: Cambiar el libro del año (Solo Administradores)
   const handleCambiarLibroAnioAdmin = async () => {
     const { value: textoBusqueda } = await Swal.fire({
-      title: '🏆 Seleccionar Libro del Año',
-      text: 'Introduce el título para buscar en el catálogo:',
-      input: 'text',
-      inputPlaceholder: 'Ej: El Imperio Final...',
+      title: "🏆 Seleccionar Libro del Año",
+      text: "Introduce el título para buscar en el catálogo:",
+      input: "text",
+      inputPlaceholder: "Ej: El Imperio Final...",
       showCancelButton: true,
-      confirmButtonColor: '#4B5043',
-      cancelButtonText: 'Cancelar'
+      confirmButtonColor: "#4B5043",
+      cancelButtonText: "Cancelar",
     });
 
     if (!textoBusqueda || !textoBusqueda.trim()) return;
 
     try {
-      const resBusqueda = await fetch(`http://localhost:8080/api/libros/buscar?q=${textoBusqueda.trim()}&isGenero=false`, { headers });
+      const resBusqueda = await fetch(
+        `http://localhost:8080/api/libros/buscar?q=${textoBusqueda.trim()}&isGenero=false`,
+        { headers },
+      );
       const librosEncontrados = await resBusqueda.json();
 
       if (librosEncontrados.length === 0) {
-        Swal.fire('Sin resultados', 'No se encontró ningún libro.', 'info');
+        Swal.fire("Sin resultados", "No se encontró ningún libro.", "info");
         return;
       }
 
@@ -200,27 +207,29 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
       });
 
       const { value: idSeleccionado } = await Swal.fire({
-        title: 'Selecciona el ejemplar',
-        input: 'select',
+        title: "Selecciona el ejemplar",
+        input: "select",
         inputOptions: opciones,
-        inputPlaceholder: 'Selecciona un libro...',
+        inputPlaceholder: "Selecciona un libro...",
         showCancelButton: true,
-        confirmButtonColor: '#4B5043',
-        cancelButtonText: 'Cancelar'
+        confirmButtonColor: "#4B5043",
+        cancelButtonText: "Cancelar",
       });
 
       if (idSeleccionado) {
-        const objetoLibro = librosEncontrados.find(l => (l.idLibro || l.isbn) === idSeleccionado);
-        
+        const objetoLibro = librosEncontrados.find(
+          (l) => (l.idLibro || l.isbn) === idSeleccionado,
+        );
+
         // 1. SINCRONIZAR (Con el Content-Type obligatorio)
         if (!objetoLibro.idLibro) {
           await fetch("http://localhost:8080/api/libros/sincronizar", {
             method: "POST",
-            headers: { 
-                ...headers, 
-                "Content-Type": "application/json" // ¡CRÍTICO para que Spring lo acepte!
+            headers: {
+              ...headers,
+              "Content-Type": "application/json", // ¡CRÍTICO para que Spring lo acepte!
             },
-            body: JSON.stringify(objetoLibro)
+            body: JSON.stringify(objetoLibro),
           });
         }
 
@@ -230,27 +239,41 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
         if (objetoLibro.titulo) params.append("titulo", objetoLibro.titulo);
         if (objetoLibro.autor) params.append("autor", objetoLibro.autor);
 
-        const resLocal = await fetch(`http://localhost:8080/api/libros/buscar-unico?${params.toString()}`, { headers });
+        const resLocal = await fetch(
+          `http://localhost:8080/api/libros/buscar-unico?${params.toString()}`,
+          { headers },
+        );
         const libroLocalizado = await resLocal.json();
 
         // 3. MARCAR COMO LIBRO DEL AÑO
-        const resMarcar = await fetch(`http://localhost:8080/api/libros/${libroLocalizado.idLibro}/marcar-libro-anio`, {
-          method: "PUT",
-          headers: headers // Aquí no hace falta Content-Type porque no hay body
-        });
+        const resMarcar = await fetch(
+          `http://localhost:8080/api/libros/${libroLocalizado.idLibro}/marcar-libro-anio`,
+          {
+            method: "PUT",
+            headers: headers, // Aquí no hace falta Content-Type porque no hay body
+          },
+        );
 
         if (resMarcar.ok) {
-          Swal.fire('¡Fijado!', 'El libro del año ha sido modificado con éxito.', 'success');
-          cargarLibroDelAnioFijo(); 
+          Swal.fire(
+            "¡Fijado!",
+            "El libro del año ha sido modificado con éxito.",
+            "success",
+          );
+          cargarLibroDelAnioFijo();
         } else {
-          Swal.fire('Error', 'No se pudo actualizar. Comprueba tus permisos de Admin.', 'error');
+          Swal.fire(
+            "Error",
+            "No se pudo actualizar. Comprueba tus permisos de Admin.",
+            "error",
+          );
         }
       }
     } catch (err) {
       console.error("Error en flujo de asignación destacado:", err);
-      Swal.fire('Error', 'Hubo un fallo de conexión.', 'error');
+      Swal.fire("Error", "Hubo un fallo de conexión.", "error");
     }
-};
+  };
 
   // Actualizador manual del contador de páginas leídas
   const handleActualizarProgreso = async () => {
@@ -258,57 +281,86 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
     const paginasTotales = itemBiblioteca.libro.paginas || 300;
 
     const { value: nuevaPagina } = await Swal.fire({
-      title: 'Actualizar progreso',
+      title: "Actualizar progreso",
       text: `¿Por qué página vas? (Total: ${paginasTotales})`,
-      input: 'number',
-      inputValue: itemBiblioteca.paginaActual || itemBiblioteca.progresoActual || 0,
-      inputPlaceholder: 'Introduce la página actual',
+      input: "number",
+      inputValue:
+        itemBiblioteca.paginaActual || itemBiblioteca.progresoActual || 0,
+      inputPlaceholder: "Introduce la página actual",
       showCancelButton: true,
-      confirmButtonColor: '#4B5043',
-      confirmButtonText: 'Guardar',
-      cancelButtonText: 'Cancelar',
-      borderRadius: '15px',
+      confirmButtonColor: "#4B5043",
+      confirmButtonText: "Guardar",
+      cancelButtonText: "Cancelar",
+      borderRadius: "15px",
       inputValidator: (value) => {
         if (!value || value < 0 || value > paginasTotales) {
           return `Introduce un número válido entre 0 y ${paginasTotales}`;
         }
-      }
+      },
     });
 
     if (nuevaPagina !== undefined) {
       try {
-        const response = await fetch(`http://localhost:8080/api/bibliotecas/actualizar-progreso`, {
-          method: 'PUT',
-          headers: headers,
-          body: JSON.stringify({ 
-            idLibroEstanteria: itemBiblioteca.id,
-            paginaActual: parseInt(nuevaPagina) 
-          })
-        });
+        const response = await fetch(
+          `http://localhost:8080/api/bibliotecas/actualizar-progreso`,
+          {
+            method: "PUT",
+            headers: headers,
+            body: JSON.stringify({
+              idLibroEstanteria: itemBiblioteca.id,
+              paginaActual: parseInt(nuevaPagina),
+            }),
+          },
+        );
 
         if (response.ok) {
-          Swal.fire({ title: '¡Progreso guardado!', icon: 'success', timer: 1500, showConfirmButton: false });
-          
-          const resLibros = await fetch(`http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`, { headers });
+          Swal.fire({
+            title: "¡Progreso guardado!",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+          const resLibros = await fetch(
+            `http://localhost:8080/api/bibliotecas/usuario/${miSesion.idUsuario}/completa`,
+            { headers },
+          );
           const items = resLibros.ok ? await resLibros.json() : [];
-          const libroActualizado = items.find((i) => i.id === itemBiblioteca.id);
+          const libroActualizado = items.find(
+            (i) => i.id === itemBiblioteca.id,
+          );
           setItemBiblioteca(libroActualizado || null);
 
-          const totalLeidosManual = items.filter((i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO").length;
+          const totalLeidosManual = items.filter(
+            (i) => i.estanteria?.nombre?.toUpperCase() === "LEÍDO",
+          ).length;
 
           try {
-            const resReto = await fetch(`http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}/actual`, { headers });
+            const resReto = await fetch(
+              `http://localhost:8080/api/retos/usuario/${miSesion.idUsuario}/actual`,
+              { headers },
+            );
             if (resReto.ok) {
               const retoData = await resReto.json();
               setStats({
-                leidos: retoData.completados !== undefined ? retoData.completados : totalLeidosManual,
-                objectiveReto: retoData.objetivoLibros || miSesion.objetivoLectura || 20
+                leidos:
+                  retoData.completados !== undefined
+                    ? retoData.completados
+                    : totalLeidosManual,
+                objectiveReto:
+                  retoData.objetivoLibros || miSesion.objetivoLectura || 20,
               });
             } else {
-              setStats({ leidos: totalLeidosManual, objetivoReto: miSesion.objetivoLectura || 20 });
+              setStats({
+                leidos: totalLeidosManual,
+                objetivoReto: miSesion.objetivoLectura || 20,
+              });
             }
           } catch (e) {
-            setStats({ leidos: totalLeidosManual, objetivoReto: miSesion.objetivoLectura || 20 });
+            setStats({
+              leidos: totalLeidosManual,
+              objetivoReto: miSesion.objetivoLectura || 20,
+            });
           }
         }
       } catch (error) {
@@ -317,27 +369,55 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
     }
   };
 
-  if (cargandoIzquierda && cargandoCentro && cargandoDerecha) {
-    return <div className="text-center py-5 text-muted">Cargando tu espacio literario...</div>;
+  // Esperamos a que TODAS las columnas terminen de cargar usando || (OR)
+  if (cargandoIzquierda || cargandoCentro || cargandoDerecha) {
+    return (
+      <div
+        className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100"
+        style={{ minHeight: "80vh" }}
+      >
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">
+          Preparando tu espacio literario...
+        </h4>
+      </div>
+    );
   }
-
-
 
   // --- VARIABLES DEL SLIDER ---
   const itemBiblioteca = librosLeyendo[indiceLibro];
   const libroLeyendo = itemBiblioteca?.libro;
-  const pagActual = itemBiblioteca?.paginaActual || itemBiblioteca?.progresoActual || 0;
+  const pagActual =
+    itemBiblioteca?.paginaActual || itemBiblioteca?.progresoActual || 0;
   const pagTotales = libroLeyendo?.paginas || 1;
   const porcentajeLibro = Math.round((pagActual / pagTotales) * 100);
-  const porcentajeReto = stats.objetivoReto > 0 ? Math.round((stats.leidos / stats.objetivoReto) * 100) : 0;
+  const porcentajeReto =
+    stats.objetivoReto > 0
+      ? Math.round((stats.leidos / stats.objetivoReto) * 100)
+      : 0;
 
   // --- FUNCIONES DEL SLIDER ---
   const anteriorLibro = () => {
-    setIndiceLibro((prev) => (prev === 0 ? librosLeyendo.length - 1 : prev - 1));
+    setIndiceLibro((prev) =>
+      prev === 0 ? librosLeyendo.length - 1 : prev - 1,
+    );
   };
 
   const siguienteLibro = () => {
-    setIndiceLibro((prev) => (prev === librosLeyendo.length - 1 ? 0 : prev + 1));
+    setIndiceLibro((prev) =>
+      prev === librosLeyendo.length - 1 ? 0 : prev + 1,
+    );
   };
 
   // --- FUNCIONES DEL MODAL DE PROGRESO ---
@@ -359,7 +439,10 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
     fetch(`http://localhost:8080/api/bibliotecas/actualizar-progreso`, {
       method: "PUT",
       headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ idLibroEstanteria: itemBiblioteca.id, paginaActual: nuevaPagina }),
+      body: JSON.stringify({
+        idLibroEstanteria: itemBiblioteca.id,
+        paginaActual: nuevaPagina,
+      }),
     }).then((res) => {
       if (res.ok) {
         const nuevosLibros = [...librosLeyendo];
@@ -376,50 +459,48 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
     fetch(`http://localhost:8080/api/bibliotecas/actualizar-estanteria`, {
       method: "PUT",
       headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        idLibroEstanteria: itemBiblioteca.id, 
-        nuevoNombreEstanteria: "Leído" 
+      body: JSON.stringify({
+        idLibroEstanteria: itemBiblioteca.id,
+        nuevoNombreEstanteria: "Leído",
       }),
     }).then((res) => {
       if (res.ok) {
-        
         // Guardamos la puntuación de estrellas en la tabla de reviews
         fetch(`http://localhost:8080/api/reviews`, {
           method: "POST",
           headers: { ...headers, "Content-Type": "application/json" },
           body: JSON.stringify({
             idUsuario: miSesion.idUsuario,
-            idLibro: libroLeyendo.idLibro, 
+            idLibro: libroLeyendo.idLibro,
             puntuacion: puntuacion,
-            //comentario: "Lectura completada desde el panel principal." 
+            //comentario: "Lectura completada desde el panel principal."
           }),
         })
-        .then((resReview) => {
-          // Una vez guardado todo con éxito, limpiamos el estado y cerramos el modal
-          const librosRestantes = librosLeyendo.filter((_, index) => index !== indiceLibro);
-          setLibrosLeyendo(librosRestantes);
-          setIndiceLibro(0);
-          setIsModalOpen(false);
-          setPuntuacion(0); // Reiniciamos las estrellas para el próximo libro
-        })
-        .catch((err) => console.error("Error al guardar la valoración:", err));
-
+          .then((resReview) => {
+            // Una vez guardado todo con éxito, limpiamos el estado y cerramos el modal
+            const librosRestantes = librosLeyendo.filter(
+              (_, index) => index !== indiceLibro,
+            );
+            setLibrosLeyendo(librosRestantes);
+            setIndiceLibro(0);
+            setIsModalOpen(false);
+            setPuntuacion(0); // Reiniciamos las estrellas para el próximo libro
+          })
+          .catch((err) =>
+            console.error("Error al guardar la valoración:", err),
+          );
       }
     });
   };
 
-
-
   return (
     <div className="container-custom py-5">
       <div className="home-grid">
-        
         {/* --- COLUMNA IZQUIERDA --- */}
         <aside className="home-grid__sidebar-left">
           <section className="infoUsuario">
-            
             {/* NUEVO BLOQUE: Enlace directo a Mis Libros */}
-            <div 
+            <div
               className="mis-libros-card"
               onClick={() => navigate("/mislibros")}
               style={{ cursor: "pointer" }}
@@ -427,64 +508,91 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
               <h3 className="mis-libros-card__titulo">Mi biblioteca</h3>
               <div className="mis-libros-card__cuerpo text-center py-2">
                 <div className="mis-libros-card__icono mb-2">
-                  <i className="bi bi-bookshelf" style={{ fontSize: "2rem", color: "var(--color-verde-oscuro)" }}></i>
+                  <i
+                    className="bi bi-bookshelf"
+                    style={{
+                      fontSize: "2rem",
+                      color: "var(--color-verde-oscuro)",
+                    }}
+                  ></i>
                 </div>
-                <span className="mis-libros-card__btn-texto">Ver mis estanterías</span>
+                <span className="mis-libros-card__btn-texto">
+                  Ver mis estanterías
+                </span>
               </div>
             </div>
 
             {/* Bloque Leyendo actualmente */}
             <div className="leyendo position-relative">
               <h3 className="leyendo__titulo">Leyendo actualmente</h3>
-              
+
               {libroLeyendo ? (
                 <div className="leyendo__libro flex-column align-items-center text-center">
-                  
                   {/* CONTROLES DEL SLIDER */}
                   <div className="d-flex justify-content-center align-items-center w-100 position-relative mb-3">
-                    
                     {librosLeyendo.length > 1 && (
-                      <button 
-                        onClick={anteriorLibro} 
-                        className="btn btn-sm btn-light shadow-sm rounded-circle position-absolute" 
-                        style={{ width: '35px', height: '35px', zIndex: 2, left: '0px' }} 
+                      <button
+                        onClick={anteriorLibro}
+                        className="btn btn-sm btn-light shadow-sm rounded-circle position-absolute"
+                        style={{
+                          width: "35px",
+                          height: "35px",
+                          zIndex: 2,
+                          left: "0px",
+                        }}
                       >
                         <i className="bi bi-chevron-left text-secondary"></i>
                       </button>
                     )}
 
-                    <picture 
-                      className="libro__picture mx-auto" 
+                    <picture
+                      className="libro__picture mx-auto"
                       onClick={() => navigate(`/libro/${libroLeyendo.isbn}`)}
                       style={{ cursor: "pointer", transition: "0.3s" }}
                     >
-                      <img src={libroLeyendo.portada || libroLeyendo.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} alt={libroLeyendo.titulo} className="libro__portada shadow-sm" />
+                      <img
+                        src={
+                          libroLeyendo.portada ||
+                          libroLeyendo.fotoPortada ||
+                          "https://via.placeholder.com/150x200?text=Sin+Portada"
+                        }
+                        alt={libroLeyendo.titulo}
+                        className="libro__portada shadow-sm"
+                      />
                     </picture>
 
                     {librosLeyendo.length > 1 && (
-                      <button 
-                        onClick={siguienteLibro} 
-                        className="btn btn-sm btn-light shadow-sm rounded-circle position-absolute" 
-                        style={{ width: '35px', height: '35px', zIndex: 2, right: '0px' }} 
+                      <button
+                        onClick={siguienteLibro}
+                        className="btn btn-sm btn-light shadow-sm rounded-circle position-absolute"
+                        style={{
+                          width: "35px",
+                          height: "35px",
+                          zIndex: 2,
+                          right: "0px",
+                        }}
                       >
                         <i className="bi bi-chevron-right text-secondary"></i>
                       </button>
                     )}
-                    
                   </div>
                   {/* FIN CONTROLES */}
 
                   <div className="libro__info w-100">
-                    <div 
-                      onClick={() => navigate(`/libro/${libroLeyendo.isbn}`)} 
+                    <div
+                      onClick={() => navigate(`/libro/${libroLeyendo.isbn}`)}
                       style={{ cursor: "pointer" }}
                       className="mb-3"
                     >
-                      <h4 className="libro__titulo mb-1">{libroLeyendo.titulo}</h4>
-                      <h4 className="libro__escritor m-0">{libroLeyendo.autor || "Autor Desconocido"}</h4>
+                      <h4 className="libro__titulo mb-1">
+                        {libroLeyendo.titulo}
+                      </h4>
+                      <h4 className="libro__escritor m-0">
+                        {libroLeyendo.autor || "Autor Desconocido"}
+                      </h4>
                     </div>
 
-                    <div 
+                    <div
                       className="libro__progreso mt-auto"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -493,15 +601,24 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
                       style={{ cursor: "pointer" }}
                       title="Haga clic para actualizar su página actual"
                     >
-                      <span className="progreso__actual d-block mb-1">Página {pagActual} / {pagTotales}</span>
+                      <span className="progreso__actual d-block mb-1">
+                        Página {pagActual} / {pagTotales}
+                      </span>
                       <div className="progress-container">
-                        <div className="progress-bar-fill" style={{ width: `${Math.min(porcentajeLibro, 100)}%` }}></div>
+                        <div
+                          className="progress-bar-fill"
+                          style={{
+                            width: `${Math.min(porcentajeLibro, 100)}%`,
+                          }}
+                        ></div>
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-muted small py-3">No estás leyendo ningún libro.</div>
+                <div className="text-center text-muted small py-3">
+                  No estás leyendo ningún libro.
+                </div>
               )}
             </div>
 
@@ -512,39 +629,63 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
                   {paso === 1 ? (
                     <>
                       <h3 className="modal-titulo">Actualizar progreso</h3>
-                      <p className="text-center text-muted">{libroLeyendo.titulo}</p>
+                      <p className="text-center text-muted">
+                        {libroLeyendo.titulo}
+                      </p>
                       <div className="modal-inputs-wrapper justify-content-center my-4">
                         <div className="input-group-custom">
                           <input
                             type="number"
                             className="modal-input-num"
                             value={nuevaPagina}
-                            onChange={(e) => setNuevaPagina(Number(e.target.value))}
+                            onChange={(e) =>
+                              setNuevaPagina(Number(e.target.value))
+                            }
                           />
                           <span className="separador">de</span>
                           <span className="total-badge">{pagTotales}</span>
                         </div>
                       </div>
                       <div className="modal-botones">
-                        <button className="btn-cancelar" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-                        <button className="btn-guardar-progreso" onClick={guardarProgresoParcial}>Guardar</button>
+                        <button
+                          className="btn-cancelar"
+                          onClick={() => setIsModalOpen(false)}
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          className="btn-guardar-progreso"
+                          onClick={guardarProgresoParcial}
+                        >
+                          Guardar
+                        </button>
                       </div>
                     </>
                   ) : (
                     <div className="modal-puntuacion text-center">
                       <h3 className="modal-titulo">¡Libro Terminado!</h3>
-                      <p>¿Qué te ha parecido <strong>{libroLeyendo?.titulo}</strong>?</p>
+                      <p>
+                        ¿Qué te ha parecido{" "}
+                        <strong>{libroLeyendo?.titulo}</strong>?
+                      </p>
                       <div className="estrellas-wrapper my-4">
                         {[1, 2, 3, 4, 5].map((estrella) => (
                           <i
                             key={estrella}
                             className={`bi ${puntuacion >= estrella ? "bi-star-fill text-warning" : "bi-star text-secondary"} estrella-icon`}
-                            style={{ fontSize: "2rem", cursor: "pointer", margin: "0 5px" }}
+                            style={{
+                              fontSize: "2rem",
+                              cursor: "pointer",
+                              margin: "0 5px",
+                            }}
                             onClick={() => setPuntuacion(estrella)}
                           ></i>
                         ))}
                       </div>
-                      <button className="btn-guardar-progreso w-100" onClick={guardarLibroTerminado}>
+                      <button
+                        className="btn-guardar-progreso w-100"
+                        onClick={guardarLibroTerminado}
+                      >
                         Finalizar lectura
                       </button>
                     </div>
@@ -554,25 +695,36 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
             )}
 
             {/* Bloque Reto del año */}
-            <div 
-              className="reto" 
+            <div
+              className="reto"
               onClick={() => navigate("/reto")}
               style={{ cursor: "pointer" }}
             >
               <h3 className="reto__titulo">Reto del año</h3>
-              
+
               {stats.objetivoReto > 0 ? (
                 <>
-                  <p className="reto__progreso-texto">{stats.leidos} de {stats.objetivoReto} libros leídos</p>
+                  <p className="reto__progreso-texto">
+                    {stats.leidos} de {stats.objetivoReto} libros leídos
+                  </p>
                   <div className="progress-container-reto">
-                    <div className="progress-bar-fill-reto" style={{ width: `${Math.min(porcentajeReto, 100)}%` }}></div>
+                    <div
+                      className="progress-bar-fill-reto"
+                      style={{ width: `${Math.min(porcentajeReto, 100)}%` }}
+                    ></div>
                     <span className="reto__porcentaje">{porcentajeReto}%</span>
                   </div>
                 </>
               ) : (
                 <div className="text-center mt-3">
-                  <i className="bi bi-trophy text-warning mb-2" style={{ fontSize: "2rem" }}></i>
-                  <p className="text-muted fw-bold mb-1" style={{ fontSize: "0.95rem" }}>
+                  <i
+                    className="bi bi-trophy text-warning mb-2"
+                    style={{ fontSize: "2rem" }}
+                  ></i>
+                  <p
+                    className="text-muted fw-bold mb-1"
+                    style={{ fontSize: "0.95rem" }}
+                  >
                     ¡Aún no tienes tu reto!
                   </p>
                   <p className="text-muted small mb-0">
@@ -588,32 +740,44 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
         <main className="home-grid__main">
           <section className="noticias">
             <div className="noticias__bienvenida">
-              <h3 className="bienvenida__titulo">Bienvenido a Reading<span className="bienvenida__titulo--verde">Vault</span></h3>
-              <p className="bienvenida__texto">Encuentra tus libros favoritos, únete a una comunidad y gestiona tu biblioteca personal</p>
+              <h3 className="bienvenida__titulo">
+                Bienvenido a Reading
+                <span className="bienvenida__titulo--verde">Vault</span>
+              </h3>
+              <p className="bienvenida__texto">
+                Encuentra tus libros favoritos, únete a una comunidad y gestiona
+                tu biblioteca personal
+              </p>
             </div>
-            
-            {esAdmin && <CrearNoticiaAdmin onNoticiaCreada={cargarNoticiasReales} />}
+
+            {esAdmin && (
+              <CrearNoticiaAdmin onNoticiaCreada={cargarNoticiasReales} />
+            )}
 
             <h1 className="noticias__titulo">NOTICIAS</h1>
             <div className="noticias__feed">
               {librosNoticias.length > 0 ? (
-                librosNoticias.slice(0, limiteNoticias).map((noticia, index) => (
-                  <NoticiaCard 
-                    key={noticia.idNoticia || index} 
-                    noticia={noticia} 
-                    esAdmin={esAdmin} 
-                    onNoticiaModificada={cargarNoticiasReales} 
-                  />
-                ))
+                librosNoticias
+                  .slice(0, limiteNoticias)
+                  .map((noticia, index) => (
+                    <NoticiaCard
+                      key={noticia.idNoticia || index}
+                      noticia={noticia}
+                      esAdmin={esAdmin}
+                      onNoticiaModificada={cargarNoticiasReales}
+                    />
+                  ))
               ) : (
-                <div className="text-center text-muted small py-3 bg-white rounded-3">No hay noticias disponibles.</div>
+                <div className="text-center text-muted small py-3 bg-white rounded-3">
+                  No hay noticias disponibles.
+                </div>
               )}
             </div>
 
             {librosNoticias.length > limiteNoticias && (
               <div className="noticias__footer text-center mt-4">
-                <button 
-                  className="noticias__btn-ver-mas" 
+                <button
+                  className="noticias__btn-ver-mas"
                   onClick={() => setLimiteNoticias((prev) => prev + 3)}
                 >
                   Ver más
@@ -627,70 +791,103 @@ fetch(`http://localhost:8080/api/reviews/recomendacion-amigo/${miSesion.idUsuari
         <aside className="home-grid__sidebar-right">
           <section className="recomendaciones">
             {libroAmigo && (
-              <div 
-                className="recomendacion text-center" 
+              <div
+                className="recomendacion text-center"
                 onClick={() => navigate(`/libro/${libroAmigo.isbn}`)}
-                style={{ cursor: "pointer" }} 
+                style={{ cursor: "pointer" }}
               >
                 <h3 className="recomendacion__titulo">¡Te recomendamos!</h3>
-                
+
                 <div className="d-flex flex-column align-items-center">
                   <picture className="recomendacion__picture mb-3">
-                    <img 
-                      src={libroAmigo.portada || libroAmigo.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} 
-                      alt={libroAmigo.titulo} 
-                      className="recomendacion__portada" 
+                    <img
+                      src={
+                        libroAmigo.portada ||
+                        libroAmigo.fotoPortada ||
+                        "https://via.placeholder.com/150x200?text=Sin+Portada"
+                      }
+                      alt={libroAmigo.titulo}
+                      className="recomendacion__portada"
                     />
                   </picture>
-                  
+
                   <div className="recomendacion__textos w-100 mb-3">
-                    <h4 className="recomendacion__libro mb-1">{libroAmigo.titulo}</h4>
-                    <h4 className="recomendacion__autor">{libroAmigo.autor || "Autor Desconocido"}</h4>
+                    <h4 className="recomendacion__libro mb-1">
+                      {libroAmigo.titulo}
+                    </h4>
+                    <h4 className="recomendacion__autor">
+                      {libroAmigo.autor || "Autor Desconocido"}
+                    </h4>
                   </div>
                 </div>
-                
-                <p className="recomendacion__amigo m-0">Selección de {nombreRecomendador}</p>
+
+                <p className="recomendacion__amigo m-0">
+                  Selección de {nombreRecomendador}
+                </p>
               </div>
             )}
 
             {libroAnio && (
-              <div 
+              <div
                 className="libroAño text-center"
                 onClick={() => navigate(`/libro/${libroAnio.isbn}`)}
                 style={{ cursor: "pointer" }}
               >
-                <div className="libro-anio-titulo-admin" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="recomendacion__titulo m-0" style={{ background: 'none', padding: 0, margin: 0 }}>¡Libro del año!</h3>
+                <div
+                  className="libro-anio-titulo-admin"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3
+                    className="recomendacion__titulo m-0"
+                    style={{ background: "none", padding: 0, margin: 0 }}
+                  >
+                    ¡Libro del año!
+                  </h3>
                   {esAdmin && (
-                    <button 
+                    <button
                       onClick={handleCambiarLibroAnioAdmin}
                       className="btn btn-sm btn-light text-warning border-0 shadow-sm d-flex align-items-center justify-content-center"
                       title="Cambiar Libro del Año"
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "rgba(255, 193, 7, 0.1)" }}
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255, 193, 7, 0.1)",
+                      }}
                     >
-                      <i className="bi bi-trophy-fill" style={{ color: "#ffc107" }}></i>
+                      <i
+                        className="bi bi-trophy-fill"
+                        style={{ color: "#ffc107" }}
+                      ></i>
                     </button>
                   )}
                 </div>
 
                 <div className="d-flex flex-column align-items-center mt-3">
                   <picture className="recomendacion__picture mb-3">
-                    <img 
-                      src={libroAnio.portada || libroAnio.fotoPortada || "https://via.placeholder.com/150x200?text=Sin+Portada"} 
-                      alt={libroAnio.titulo} 
-                      className="recomendacion__portada" 
+                    <img
+                      src={
+                        libroAnio.portada ||
+                        libroAnio.fotoPortada ||
+                        "https://via.placeholder.com/150x200?text=Sin+Portada"
+                      }
+                      alt={libroAnio.titulo}
+                      className="recomendacion__portada"
                     />
                   </picture>
                   <div className="recomendacion__textos w-100">
-                    <h4 className="recomendacion__libro mb-1">{libroAnio.titulo}</h4>
-                    <h4 className="recomendacion__autor m-0">{libroAnio.autor || "Autor Desconocido"}</h4>
+                    <h4 className="recomendacion__libro mb-1">
+                      {libroAnio.titulo}
+                    </h4>
+                    <h4 className="recomendacion__autor m-0">
+                      {libroAnio.autor || "Autor Desconocido"}
+                    </h4>
                   </div>
                 </div>
               </div>
             )}
           </section>
         </aside>
-
       </div>
     </div>
   );

@@ -355,4 +355,15 @@ public class LibroController {
 
         return ResponseEntity.ok("Proceso iniciado.");
     }
+
+    @GetMapping("/recomendacion-aleatoria")
+    public ResponseEntity<?> obtenerRecomendacionAleatoriaVault() {
+        Optional<Libro> libroAleatorio = libroRepository.findRecomendacionAleatoriaVault();
+        
+        if (libroAleatorio.isPresent()) {
+            return ResponseEntity.ok(libroAleatorio.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

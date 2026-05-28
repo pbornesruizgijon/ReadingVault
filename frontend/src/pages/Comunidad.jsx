@@ -15,6 +15,7 @@ export default function Comunidad() {
 
   const cargarUsuarios = async () => {
     setCargando(true);
+    //await new Promise(resolve => setTimeout(resolve, 5000));
     const token = localStorage.getItem("token");
     try {
       
@@ -53,6 +54,7 @@ export default function Comunidad() {
   
   const cargarGrupos = async () => {
     setCargando(true);
+    //await new Promise(resolve => setTimeout(resolve, 1000));
     const token = localStorage.getItem("token");
     try {
       const response = await fetch('http://localhost:8080/api/comunidades', {
@@ -128,10 +130,26 @@ export default function Comunidad() {
         </div>
 
         {/* Resultados */}
-        <div className="row g-4">
+      <div className="row g-4">
           {pestaña === 'grupos' && (
-            cargando ? <p className="text-center w-100">Cargando clubes de lectura...</p> :
-            gruposFiltrados.length > 0 ? (
+            cargando ? (
+              // --- SPINNER DEL LIBRO PARA GRUPOS ---
+              <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "400px" }}>
+                <div className="book">
+                  <div className="inner">
+                    <div className="left"></div>
+                    <div className="middle"></div>
+                    <div className="right"></div>
+                  </div>
+                  <ul>
+                    {[...Array(18)].map((_, i) => (
+                      <li key={i}></li>
+                    ))}
+                  </ul>
+                </div>
+                <h4 className="loader-texto mt-5 text-muted fw-bold">Cargando clubes de lectura...</h4>
+              </div>
+            ) : gruposFiltrados.length > 0 ? (
               gruposFiltrados.map(grupo => (
                 <div key={grupo.idComunidad} className="col-md-6 col-lg-4">
                   <div className="comunidad-card h-100 d-flex flex-column">
@@ -184,7 +202,22 @@ export default function Comunidad() {
 
           {pestaña === 'usuarios' && (
             cargando ? (
-              <p className="text-center w-100">Cargando datos...</p>
+              // --- SPINNER DEL LIBRO PARA USUARIOS ---
+              <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "400px" }}>
+                <div className="book">
+                  <div className="inner">
+                    <div className="left"></div>
+                    <div className="middle"></div>
+                    <div className="right"></div>
+                  </div>
+                  <ul>
+                    {[...Array(18)].map((_, i) => (
+                      <li key={i}></li>
+                    ))}
+                  </ul>
+                </div>
+                <h4 className="loader-texto mt-5 text-muted fw-bold">Buscando lectores...</h4>
+              </div>
             ) : busqueda.trim() === '' ? (
               <div className="text-center w-100 py-5">
                 <i className="bi bi-search display-1 text-muted mb-3 opacity-50"></i>

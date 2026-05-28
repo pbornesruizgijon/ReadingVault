@@ -49,8 +49,10 @@ export default function PerfilUsuario() {
 
     fetch(`http://localhost:8080/api/usuarios/${idUsuario}`, { headers })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
+      .then(async (data) => { 
         setUsuario(data);
+        
+        
         setCargando(false);
       })
       .catch(() => navigate("/"));
@@ -182,12 +184,23 @@ export default function PerfilUsuario() {
 
   if (cargando || !usuario) {
     return (
-      <div
-        className="d-flex flex-column justify-content-center align-items-center"
+      <div 
+        className="loader-container d-flex flex-column justify-content-center align-items-center text-center" 
         style={{ height: "80vh" }}
       >
-        <div className="spinner-grow text-success" role="status"></div>
-        <p className="mt-3 text-muted">Abriendo bóveda...</p>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Abriendo bóveda...</h4>
       </div>
     );
   }

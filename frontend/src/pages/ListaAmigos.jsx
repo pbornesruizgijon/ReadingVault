@@ -38,6 +38,7 @@ export default function TusAmigos() {
   const cargarDatosSociales = async () => {
     setCargando(true);
     try {
+      //await new Promise(resolve => setTimeout(resolve, 3000));
       // Las solicitudes solo se cargan si es MI lista
       if (esMiPropiaLista) {
         const resPen = await fetch(
@@ -102,6 +103,26 @@ export default function TusAmigos() {
   const amigosFiltrados = amigos.filter((a) =>
     a.nombreUsuario.toLowerCase().includes(busqueda.toLowerCase()),
   );
+
+  if (cargando) {
+    return (
+      <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "80vh" }}>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Buscando lectores...</h4>
+      </div>
+    );
+  }
 
   return (
     <div className="tus-amigos-bg py-5">

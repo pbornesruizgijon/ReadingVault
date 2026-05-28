@@ -427,10 +427,35 @@ export default function DetalleGrupo() {
     }
   };
 
-  if (cargando)
-    return <div className="text-center py-5">Cargando club de lectura...</div>;
-  if (!grupo)
-    return <div className="text-center py-5">Grupo no encontrado.</div>;
+  if (cargando) {
+    return (
+      <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "60vh" }}>
+        <div className="book">
+          <div className="inner">
+            <div className="left"></div>
+            <div className="middle"></div>
+            <div className="right"></div>
+          </div>
+          <ul>
+            {[...Array(18)].map((_, i) => (
+              <li key={i}></li>
+            ))}
+          </ul>
+        </div>
+        <h4 className="loader-texto mt-5 text-muted fw-bold">Cargando club de lectura...</h4>
+      </div>
+    );
+  }
+
+  if (!grupo) {
+    return (
+      <div className="text-center w-100 py-5" style={{ minHeight: "60vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <i className="bi bi-exclamation-circle display-1 text-muted mb-3 opacity-50"></i>
+        <h4 className="text-muted fw-bold">Grupo no encontrado</h4>
+        <p className="text-muted">El club de lectura que buscas no existe o ha sido eliminado.</p>
+      </div>
+    );
+  }
 
   const miMembresia = grupo.miembros?.find(m => m.usuario.idUsuario === sesion.idUsuario);
   const soyAdmin = miMembresia?.rol === "admin";
