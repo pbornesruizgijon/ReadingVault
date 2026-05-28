@@ -103,7 +103,7 @@
     font-size: 0.95rem;
     color: var(--color-verde-oscuro);
     display: -webkit-box;
-    -webkit-line-clamp: 1; /* Corta el título si es larguísimo para no deformar la tarjeta */
+    -webkit-line-clamp: 1; 
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -178,6 +178,47 @@
 .btn-seguir:hover {
     background-color: var(--color-azul-footer);
     color: white;
+}
+
+/* --- TOAST DE NOTIFICACIONES --- */
+.vault-toast {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    padding: 15px 25px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    z-index: 100000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    
+    /* ¡NUEVO! Estos dos seguros evitan que se estire por toda la pantalla */
+    width: max-content; 
+    max-width: 400px; 
+    
+    animation: slideInVault 0.4s ease-out;
+}
+
+.vault-toast--success {
+    background-color: var(--color-verde-oscuro);
+}
+
+.vault-toast--error {
+    background-color: var(--color-rojo-vino);
+}
+
+/* La animación que faltaba para que entre bonito */
+@keyframes slideInVault {
+    from { 
+        transform: translateX(100%); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
 }
 
 

@@ -46,8 +46,11 @@
 .steam-textarea:focus { outline: none; border-color: var(--accent); background-color: white; }
 .steam-acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
 .btn-steam { padding: 8px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; border: none; }
-.btn-steam-publicar { background-color: var(--color-verde-oscuro); color: white; }
-
+.btn-steam-publicar { background-color: var(--color-salmon); color: white; }
+.btn-steam-publicar:hover{
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
+}
 /* --- RESEÑAS COMUNIDAD --- */
 .review-card { 
     background-color: #ffffff; 
