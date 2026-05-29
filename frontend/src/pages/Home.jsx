@@ -103,7 +103,7 @@ export default function Home() {
 
   // Carga las noticias guardadas en el backend
   const cargarNoticiasReales = () => {
-    fetch(`${API_BASE_URL}0/api/noticias`, { headers })
+    fetch(`${API_BASE_URL}/api/noticias`, { headers })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         setLibrosNoticias(data);
