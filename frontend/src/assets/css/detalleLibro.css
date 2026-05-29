@@ -1,7 +1,7 @@
 /* --- Estructura de Fondos --- */
 .detalle-top-bg { background-color: var(--color-azul-claro); }
 .detalle-reviews-bg { 
-    background-color: var(--color-azul-footer);
+    background-color: transparent;
     min-height: 50vh; 
     padding: 60px 0;
 }
@@ -16,6 +16,12 @@
 .detalle-autor { font-size: 1.8rem; font-weight: 300; color: #4a5754; }
 .detalle-stats { font-size: 0.95rem; color: #4a5754; }
 .detalle-texto { font-size: 1.05rem; line-height: 1.5; }
+
+.detalle-titulo-seccion{
+    background-color: var(--color-azul-footer);
+    padding: 2.5rem;
+}
+
 
 /* --- Sistema del Vault --- */
 .libro-card__acciones { position: relative; width: 100%; }

@@ -23,7 +23,7 @@ export function SidebarUsuario({
   const resenas = stats?.resenas || 0;
   const amigosCount = stats?.amigos || 0;
   const gruposCount = stats?.grupos || 0;
-  const objetivo = stats?.objetivoReto || 20;
+  const objetivo = stats?.objetivoReto || 0;
   const porcentaje = Math.round((leidos / objetivo) * 100);
 
   if (!user) return null;
@@ -124,29 +124,56 @@ export function SidebarUsuario({
 
       <div className="perfil-card">
         <h5 className="sidebar-titulo">RETO ANUAL</h5>
+        
         {permisoLibros ? (
-          <>
-            <p className="small text-center mb-2">
-              {esMiPropioPerfil ? "Has leído" : `${user.nombreUsuario} ha leído`} <strong>{leidos}</strong> de {objetivo} libros
-            </p>
-            <div className="progress progress-reto-container mb-3">
-              <div
-                className="progress-bar progress-reto-bar"
-                style={{ width: `${Math.min(porcentaje, 100)}%` }}
-              ></div>
+          objetivo > 0 ? (
+            // --- TIENE RETO CONFIGURADO ---
+            <>
+              <p className="small text-center mb-2">
+                {esMiPropioPerfil ? "Has leído" : `${user.nombreUsuario} ha leído`} <strong>{leidos}</strong> de {objetivo} libros
+              </p>
+              <div className="progress progress-reto-container mb-3">
+                <div
+                  className="progress-bar progress-reto-bar bg-success"
+                  style={{ width: `${Math.min(porcentaje, 100)}%` }}
+                ></div>
+              </div>
+              
+              {esMiPropioPerfil && (
+                <button
+                  type="button"
+                  className="btn btn-vault w-100"
+                  onClick={() => navigate("/reto")} 
+                >
+                  Ver mi reto
+                </button>
+              )}
+            </>
+          ) : (
+            // --- NO TIENE RETO CONFIGURADO ---
+            <div className="text-center py-2">
+              <i className="bi bi-trophy text-warning mb-2" style={{ fontSize: "2rem" }}></i>
+              {esMiPropioPerfil ? (
+                <>
+                  <p className="fw-bold mb-1" style={{ fontSize: "0.9rem" }}>¡Aún no tienes tu reto!</p>
+                  <p className="text-muted small mb-3">Márcate un objetivo anual de lectura.</p>
+                  <button
+                    type="button"
+                    className="btn btn-sm w-100 rounded-pill btn-crear-reto"
+                    onClick={() => navigate("/reto")} 
+                  >
+                    Crear mi reto
+                  </button>
+                </>
+              ) : (
+                <p className="text-muted small mb-0">
+                  {user.nombreUsuario} no tiene ningún reto activo.
+                </p>
+              )}
             </div>
-            
-            {esMiPropioPerfil && (
-              <button
-                type="button"
-                className="btn btn-vault w-100"
-                onClick={() => navigate("/reto")} 
-              >
-                Ver mi reto
-              </button>
-            )}
-          </>
+          )
         ) : (
+          // --- NO HAY PERMISOS PARA VERLO ---
           <p className="text-muted small text-center mb-0">Progreso del reto privado</p>
         )}
       </div>

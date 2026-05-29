@@ -17,7 +17,7 @@ export default function PerfilUsuario() {
     resenas: 0,
     amigos: 0,
     grupos: 0,
-    objetivoReto: 20,
+    objetivoReto: 0,
   });
   const [cargando, setCargando] = useState(true);
   const [actividadLibros, setActividadLibros] = useState([]);
@@ -51,8 +51,6 @@ export default function PerfilUsuario() {
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then(async (data) => { 
         setUsuario(data);
-        
-        
         setCargando(false);
       })
       .catch(() => navigate("/"));
@@ -98,6 +96,23 @@ export default function PerfilUsuario() {
       .then((amigos) =>
         setStats((prev) => ({ ...prev, amigos: amigos.length })),
       );
+
+    
+    fetch(`http://localhost:8080/api/retos/usuario/${idUsuario}/actual`, { headers })
+      .then((res) => {
+        if (!res.ok) throw new Error("Sin reto configurado");
+        return res.json();
+      })
+      .then((retoData) => {
+        setStats((prev) => ({
+          ...prev,
+          objetivoReto: retoData.objetivoLibros || 0,
+        }));
+      })
+      .catch(() => {
+        setStats((prev) => ({ ...prev, objetivoReto: 0 }));
+      });
+
   }, [idUsuario, navigate]);
 
   const manejarSolicitudAmistad = () => {
