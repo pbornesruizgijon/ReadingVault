@@ -1,42 +1,19 @@
 import axios from "axios";
 
-// URL API de Spring Boot
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/auth/";
+// 1. Solo la URL base (asegúrate de que en Railway sea: https://...)
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-axios.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            // Inyectamos el token en caliente justo antes de disparar la petición
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+// 2. Construimos la ruta de forma limpia
+const API_URL = `${BASE_URL.replace(/\/$/, "")}/api/auth`;
 
-/**
- * Envía los datos de registro al backend.
- */
+axios.interceptors.request.use(/* ... tu código igual ... */);
+
 const register = (userData) => {
-    // return axios.post(API_URL + "registro", {
-    //     nombre: userData.nombre,
-    //     apellidos: userData.apellidos,
-    //     fechaNacimiento: userData.fechaNacimiento,
-    //     nombreUsuario: userData.nombreUsuario,
-    //     email: userData.email,
-    //     password: userData.password
-    // });
-    return axios.post(API_URL + "registro", userData);
+    return axios.post(`${API_URL}/registro`, userData);
 };
 
-/**
- * Envía las credenciales de login y devuelve el token JWT
- */
 const login = (email, password) => {
-    return axios.post(API_URL + "login", {
+    return axios.post(`${API_URL}/login`, {
         email,
         password
     });
