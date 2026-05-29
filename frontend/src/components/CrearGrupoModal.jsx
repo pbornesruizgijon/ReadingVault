@@ -12,10 +12,13 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
   const [busquedaLibro, setBusquedaLibro] = useState('');
   const [resultadosLibros, setResultadosLibros] = useState([]);
   const [libroSeleccionado, setLibroSeleccionado] = useState(null);
+  const [errorValidacion, setErrorValidacion] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Limpiamos el error si el usuario empieza a escribir
+    if (errorValidacion) setErrorValidacion('');
   };
 
   const handleFileChange = (e) => {
@@ -25,6 +28,7 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
   const handleBuscarLibro = async (e) => {
     const texto = e.target.value;
     setBusquedaLibro(texto);
+    if (errorValidacion) setErrorValidacion(''); // Limpiamos errores al buscar
 
     if (texto.trim().length < 3) {
         setResultadosLibros([]);
@@ -46,24 +50,42 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
     } catch (error) {
         console.error("Error buscando en BD:", error);
     }
-};
+  };
+
+  // Previene que la tecla Enter dentro del buscador envíe el formulario general
+  const prevenirEnterEnBuscador = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
 
   const seleccionarLibro = (libro) => {
     setLibroSeleccionado(libro);
     setBusquedaLibro(''); 
     setResultadosLibros([]); 
+    setErrorValidacion(''); // Si elige un libro, quitamos el error
   };
 
   const quitarLibro = () => {
     setLibroSeleccionado(null);
   };
 
+  // Función para cerrar y resetear el modal limpio
+  const cerrarModal = () => {
+    onClose();
+    setFormData({ nombre: '', descripcion: '', foto: null });
+    setLibroSeleccionado(null);
+    setBusquedaLibro('');
+    setResultadosLibros([]);
+    setErrorValidacion('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Si el usuario no ha seleccionado un libro de la lista, cortamos
+    // Si el usuario no ha seleccionado un libro de la lista, mostramos el error integrado
     if (!libroSeleccionado || !libroSeleccionado.idLibro) {
-        alert("Por favor, selecciona un libro válido.");
+        setErrorValidacion("Por favor, busca y selecciona un libro de la lista para continuar.");
         return;
     }
 
@@ -85,15 +107,14 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
         });
 
         if (response.ok) {
-            onClose();
-            setFormData({ nombre: '', descripcion: '', foto: null });
-            setLibroSeleccionado(null);
+            cerrarModal();
             if (onGrupoCreado) onGrupoCreado();
-          } else {
-            alert("Hubo un error al crear el grupo.");
-          }
+        } else {
+            setErrorValidacion("Hubo un error al crear el grupo. Inténtalo de nuevo.");
+        }
     } catch (error) {
-          console.error("Error de conexión:", error);
+        console.error("Error de conexión:", error);
+        setErrorValidacion("Error de conexión con el servidor.");
     }
   };
 
@@ -104,7 +125,7 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
       <div className="modal-custom">
         <div className="modal-header-custom">
           <h3 className="modal-title-custom">Crear nuevo Club de Lectura</h3>
-          <button className="btn-close-modal" onClick={onClose}>
+          <button type="button" className="btn-close-modal" onClick={cerrarModal}>
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
@@ -138,6 +159,7 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
                     placeholder="Escribe el título para buscar..."
                     value={busquedaLibro}
                     onChange={handleBuscarLibro}
+                    onKeyDown={prevenirEnterEnBuscador} // Evita el Enter
                   />
                 </div>
                 
@@ -225,8 +247,16 @@ const CrearGrupoModal = ({ show, onClose, onGrupoCreado }) => {
             />
           </div>
 
+          {/* --- BLOQUE DE ERROR VISUAL --- */}
+          {errorValidacion && (
+            <div className="alert alert-danger p-2 text-center small mb-3 border-0 rounded-3 shadow-sm">
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              {errorValidacion}
+            </div>
+          )}
+
           <div className="modal-footer-custom">
-            <button type="button" className="btn-cancelar" onClick={onClose}>Cancelar</button>
+            <button type="button" className="btn-cancelar" onClick={cerrarModal}>Cancelar</button>
             <button type="submit" className="btn-crear">Crear Grupo</button>
           </div>
 

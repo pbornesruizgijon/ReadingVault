@@ -152,7 +152,7 @@
 }
 
 .btn-unirse {
-    background-color: var(--accent);
+    background-color: var(--color-salmon);
     color: white;
     border: none;
     padding: 8px 15px;
@@ -162,7 +162,8 @@
 }
 
 .btn-unirse:hover {
-    filter: brightness(0.9);
+    background-color: var(--color-amarillo);
+    color: var(--color-verde-oscuro);
 }
 
 .btn-seguir {

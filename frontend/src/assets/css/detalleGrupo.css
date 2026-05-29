@@ -23,10 +23,10 @@
 .grupo-header {
     width: 100%;
     height: 550px;
-    background-size: contain; /* Asegura que la imagen completa quepa dentro */
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-color: #1a1a1a; /* Un gris muy oscuro para que no se vea blanco vacío */
+    background-color: #1a1a1a; 
 }
 
 .texto-header-container {
@@ -210,4 +210,57 @@ a.opacity-90:hover {
     transform: scale(1.03);
     transition: all 0.2s ease;
     color: var(--color-amarillo) !important;
+}
+
+/* Estado normal por defecto */
+.btn-guardar-progreso {
+  background-color: var(--color-salmon);
+  color: #ffff;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+/* Efecto hover solo cuando NO está desactivado (opcional, pero queda mejor) */
+.btn-guardar-progreso:hover:not(:disabled) {
+  background-color: var(--color-amarillo);
+  color: var(--color-verde-oscuro);
+}
+
+/* Estado desactivado (error o página vacía) */
+.btn-guardar-progreso:disabled {
+  background-color: var(--color-salmon);
+  color: #ffff;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.btn-guardar-edicion {
+    background-color: var(--color-salmon) !important;
+    color: #ffff;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.btn-guardar-edicion:hover {
+    background-color: var(--color-amarillo) !important;
+    color: var(--color-verde-oscuro) !important;
+    transform: translateY(-2px);
+}
+
+.btn-cancelar-edicion {
+    background-color: var(--color-rojo-vino);
+    font-weight: bold;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Opcional: si quieres asegurar que al hacer foco no pase nada */
+.btn-cancelar-edicion:hover {
+    box-shadow: none !important;
+    outline: none !important;
 }

@@ -4,7 +4,7 @@ import '../assets/css/comunidad.css';
 import CrearGrupoModal from '../components/CrearGrupoModal';
 
 export default function Comunidad() {
-  // Estados
+  // Estados generales
   const [pestaña, setPestaña] = useState('grupos'); 
   const [busqueda, setBusqueda] = useState('');
   const [usuarios, setUsuarios] = useState([]); 
@@ -13,18 +13,28 @@ export default function Comunidad() {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
+  // Estados paginación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const elementosPorPagina = 12;
+
+  // Sesión usuario
+  const sesionStr = localStorage.getItem("usuario");
+  const sesion = sesionStr ? JSON.parse(sesionStr) : null;
+
+  // Reset de página al buscar o cambiar de pestaña
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, pestaña]);
+
   const cargarUsuarios = async () => {
     setCargando(true);
-    //await new Promise(resolve => setTimeout(resolve, 5000));
     const token = localStorage.getItem("token");
     try {
-      
       const response = await fetch('http://localhost:8080/api/usuarios', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setUsuarios(data);
       }
     } catch (error) {
@@ -37,24 +47,26 @@ export default function Comunidad() {
   useEffect(() => {
     if (pestaña === 'usuarios') {
       cargarUsuarios();
-    }else if (pestaña === 'grupos') {
+    } else if (pestaña === 'grupos') {
       cargarGrupos(); 
     }
   }, [pestaña]);
 
-  // Filtrado por búsqueda
+  // Filtrado por búsqueda para usuarios
   const usuariosFiltrados = usuarios.filter(u => {
     const textoBuscado = busqueda.toLowerCase();
     const nombreUsuario = (u.nombreUsuario || u.nombre_usuario || "").toLowerCase();
-    // Devuelve true si el texto buscado está en el campo
-    return nombreUsuario.includes(textoBuscado) 
-    
-         
+    return nombreUsuario.includes(textoBuscado);
   });
   
+  // PAGINACIÓN USUARIOS
+  const indiceUltimoUsuario = paginaActual * elementosPorPagina;
+  const indicePrimerUsuario = indiceUltimoUsuario - elementosPorPagina;
+  const usuariosPaginados = usuariosFiltrados.slice(indicePrimerUsuario, indiceUltimoUsuario);
+  const totalPaginasUsuarios = Math.ceil(usuariosFiltrados.length / elementosPorPagina);
+
   const cargarGrupos = async () => {
     setCargando(true);
-    //await new Promise(resolve => setTimeout(resolve, 1000));
     const token = localStorage.getItem("token");
     try {
       const response = await fetch('http://localhost:8080/api/comunidades', {
@@ -62,7 +74,7 @@ export default function Comunidad() {
       });
       if (response.ok) {
         const data = await response.json();
-        setGrupos(data); // Guardamos los grupos de la BD
+        setGrupos(data);
       }
     } catch (error) {
       console.error("Error cargando grupos:", error);
@@ -75,13 +87,59 @@ export default function Comunidad() {
     g.nombre?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  
-  
+  // ORDENACIÓN: Grupos del usuario primero
+  const gruposOrdenados = [...gruposFiltrados].sort((a, b) => {
+    const esMiembroA = a.miembros?.some(m => m.usuario.idUsuario === sesion?.idUsuario);
+    const esMiembroB = b.miembros?.some(m => m.usuario.idUsuario === sesion?.idUsuario);
+    
+    if (esMiembroA && !esMiembroB) return -1;
+    if (!esMiembroA && esMiembroB) return 1;
+    return 0;
+  });
+
+  // PAGINACIÓN GRUPOS
+  const indiceUltimoGrupo = paginaActual * elementosPorPagina;
+  const indicePrimerGrupo = indiceUltimoGrupo - elementosPorPagina;
+  const gruposPaginados = gruposOrdenados.slice(indicePrimerGrupo, indiceUltimoGrupo);
+  const totalPaginasGrupos = Math.ceil(gruposOrdenados.length / elementosPorPagina);
+
+
+  // --- FUNCIONES DE ESTILO DE PAGINACIÓN IDÉNTICAS AL BUSCADOR ---
+
+  const cambiarPagina = (nuevaPagina) => {
+    setPaginaActual(nuevaPagina);
+    // Efecto smooth scroll hacia arriba al cambiar de página
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const renderNumerosPagina = (totalPaginas) => {
+    const paginas = [];
+    const maxPaginasVisibles = 5;
+    let inicio = Math.max(1, paginaActual - 2);
+    let fin = Math.min(totalPaginas, inicio + maxPaginasVisibles - 1);
+
+    // Ajuste si estamos cerca del final para mostrar siempre 5 botones si es posible
+    if (fin - inicio + 1 < maxPaginasVisibles) {
+      inicio = Math.max(1, fin - maxPaginasVisibles + 1);
+    }
+
+    for (let i = inicio; i <= fin; i++) {
+      paginas.push(
+        <button
+          key={i}
+          className={`btn ${paginaActual === i ? "btn-success" : "btn-outline-success"} mx-1`}
+          onClick={() => cambiarPagina(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+    return paginas;
+  };
 
   return (
     <main className="comunidad-bg py-5">
       <div className="container-custom">
-        
         {/* Cabecera */}
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3">
           <h1 className="comunidad-titulo mb-0">Comunidad</h1>
@@ -93,7 +151,6 @@ export default function Comunidad() {
         {/* Buscador y Pestañas */}
         <div className="busqueda-container p-4 mb-5 shadow-sm">
           <div className="row g-3 align-items-center">
-            
             <div className="col-md-5">
               <div className="d-flex gap-2 nav-pestañas">
                 <button 
@@ -110,7 +167,6 @@ export default function Comunidad() {
                 </button>
               </div>
             </div>
-
             <div className="col-md-7">
               <div className="input-group">
                 <span className="input-group-text bg-white border-end-0">
@@ -125,15 +181,13 @@ export default function Comunidad() {
                 />
               </div>
             </div>
-
           </div>
         </div>
 
         {/* Resultados */}
-      <div className="row g-4">
+        <div className="row g-4">
           {pestaña === 'grupos' && (
             cargando ? (
-              // --- SPINNER DEL LIBRO PARA GRUPOS ---
               <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "400px" }}>
                 <div className="book">
                   <div className="inner">
@@ -149,48 +203,75 @@ export default function Comunidad() {
                 </div>
                 <h4 className="loader-texto mt-5 text-muted fw-bold">Cargando clubes de lectura...</h4>
               </div>
-            ) : gruposFiltrados.length > 0 ? (
-              gruposFiltrados.map(grupo => (
-                <div key={grupo.idComunidad} className="col-md-6 col-lg-4">
-                  <div className="comunidad-card h-100 d-flex flex-column">
-                    <div className="posicion-foto-grupo">
-                      <img src={grupo.foto} alt={grupo.nombre} className="card-img-top grupo-img" />
-                    </div>
-                    
-                    <div className="card-body p-4 text-center d-flex flex-column flex-grow-1">
-                      <h5 className="fw-bold mb-1 grupo-nombre-comunidad">{grupo.nombre}</h5>
-                      <p className="text-muted small mb-3">
-                        <i className="bi bi-person-hearts me-1 text-danger"></i> 
-                        {grupo.miembros ? grupo.miembros.length : 0} miembros
-                      </p>
-                      
-                      {/* SECCIÓN DEL LIBRO ACTUAL */}
-                      <div className="mt-2 mb-4 flex-grow-1 d-flex align-items-center justify-content-center">
-                        {grupo.libro ? (
-                          <div className="lectura-actual-badge p-2.5 rounded w-100 d-flex align-items-center gap-2 text-start">
-                            <i className="bi bi-book-half text-vault-verde fs-5 ms-1"></i>
-                            <div>
-                              <span className="d-block libro-leyendo-label">Leyendo ahora:</span>
-                              <strong className="libro-leyendo-titulo">{grupo.libro.titulo}</strong>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="lectura-vacia-badge p-2.5 rounded w-100 text-center">
-                            <span className="text-muted small"><i className="bi bi-pause-circle me-1"></i> Sin lectura activa</span>
-                          </div>
-                        )}
+            ) : gruposPaginados.length > 0 ? (
+              <>
+                {gruposPaginados.map(grupo => (
+                  <div key={grupo.idComunidad} className="col-md-6 col-lg-4">
+                    <div className="comunidad-card h-100 d-flex flex-column">
+                      <div className="posicion-foto-grupo">
+                        <img src={grupo.foto} alt={grupo.nombre} className="card-img-top grupo-img" />
                       </div>
-                      
-                      <button 
-                        className="btn-unirse mt-auto w-100"
-                        onClick={() => navigate(`/comunidad/grupo/${grupo.idComunidad}`)}
+                      <div className="card-body p-4 text-center d-flex flex-column flex-grow-1">
+                        <h5 className="fw-bold mb-1 grupo-nombre-comunidad">{grupo.nombre}</h5>
+                        <p className="text-muted small mb-3">
+                          <i className="bi bi-person-hearts me-1 text-danger"></i> 
+                          {grupo.miembros ? grupo.miembros.length : 0} miembros
+                        </p>
+                        
+                        <div className="mt-2 mb-4 flex-grow-1 d-flex align-items-center justify-content-center">
+                          {grupo.libro ? (
+                            <div className="lectura-actual-badge p-2.5 rounded w-100 d-flex align-items-center gap-2 text-start">
+                              <i className="bi bi-book-half text-vault-verde fs-5 ms-1"></i>
+                              <div>
+                                <span className="d-block libro-leyendo-label">Leyendo ahora:</span>
+                                <strong className="libro-leyendo-titulo">{grupo.libro.titulo}</strong>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="lectura-vacia-badge p-2.5 rounded w-100 text-center">
+                              <span className="text-muted small"><i className="bi bi-pause-circle me-1"></i> Sin lectura activa</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <button 
+                          className="btn-unirse mt-auto w-100"
+                          onClick={() => navigate(`/comunidad/grupo/${grupo.idComunidad}`)}
+                        >
+                          Ver grupo
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* --- PAGINACIÓN ESTILO BUSCADOR PARA GRUPOS --- */}
+                {totalPaginasGrupos > 1 && (
+                  <div className="col-12">
+                    <div className="pagination-wrapper d-flex justify-content-center align-items-center mt-5 mb-3 gap-2">
+                      <button
+                        className="btn btn-outline-success"
+                        onClick={() => cambiarPagina(paginaActual - 1)}
+                        disabled={paginaActual === 1}
                       >
-                        Ver grupo
+                        <i className="bi bi-chevron-left"></i>
+                      </button>
+
+                      <div className="d-none d-sm-flex">
+                        {renderNumerosPagina(totalPaginasGrupos)}
+                      </div>
+
+                      <button
+                        className="btn btn-outline-success"
+                        onClick={() => cambiarPagina(paginaActual + 1)}
+                        disabled={paginaActual === totalPaginasGrupos}
+                      >
+                        <i className="bi bi-chevron-right"></i>
                       </button>
                     </div>
                   </div>
-                </div>
-              ))
+                )}
+              </>
             ) : (
               <div className="text-center w-100 py-5">
                 <i className="bi bi-chat-square-dots display-1 text-muted mb-3 opacity-50"></i>
@@ -202,7 +283,6 @@ export default function Comunidad() {
 
           {pestaña === 'usuarios' && (
             cargando ? (
-              // --- SPINNER DEL LIBRO PARA USUARIOS ---
               <div className="loader-container d-flex flex-column justify-content-center align-items-center text-center w-100" style={{ minHeight: "400px" }}>
                 <div className="book">
                   <div className="inner">
@@ -224,28 +304,55 @@ export default function Comunidad() {
                 <h4 className="text-muted fw-bold">Encuentra a otros lectores</h4>
                 <p className="text-muted">Escribe un nombre de usuario arriba para empezar a buscar.</p>
               </div>
-            ) : usuariosFiltrados.length > 0 ? (
-              usuariosFiltrados.map(user => (
-                <div key={user.idUsuario || user.id} className="col-md-6 col-lg-3">
-                  <div className="comunidad-card h-100 p-4 text-center d-flex flex-column align-items-center">
-                    <img 
-                      /* Aplicamos la misma validación estricta que en las reseñas */
-                      src={(user.fotoPerfil && user.fotoPerfil !== "null" && user.fotoPerfil.trim() !== "") 
-                            ? user.fotoPerfil 
-                            : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-                      alt={user.nombreUsuario} 
-                      className="usuario-avatar mb-3 shadow-sm" 
-                    />
-                    {/* Mostramos el nombreUsuario */}
-                    <h5 className="fw-bold mb-1">{user.nombreUsuario}</h5>
-                    
-                    <div className="d-flex gap-3 text-muted small mt-auto">
-                      <span><i className="bi bi-book-fill me-1"></i> {user.totalLibros || 0} leídos</span>
+            ) : usuariosPaginados.length > 0 ? (
+              <>
+                {usuariosPaginados.map(user => (
+                  <div key={user.idUsuario || user.id} className="col-md-6 col-lg-3">
+                    <div className="comunidad-card h-100 p-4 text-center d-flex flex-column align-items-center">
+                      <img 
+                        src={(user.fotoPerfil && user.fotoPerfil !== "null" && user.fotoPerfil.trim() !== "") 
+                              ? user.fotoPerfil 
+                              : "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
+                        alt={user.nombreUsuario} 
+                        className="usuario-avatar mb-3 shadow-sm" 
+                      />
+                      <h5 className="fw-bold mb-1">{user.nombreUsuario}</h5>
+                      
+                      <div className="d-flex gap-3 text-muted small mt-auto">
+                        <span><i className="bi bi-book-fill me-1"></i> {user.totalLibros || 0} leídos</span>
+                      </div>
+                      <button className="btn-seguir mt-3 w-100" onClick={() => navigate(`/perfil/${user.idUsuario}`)}>Ver perfil</button>
                     </div>
-                    <button className="btn-seguir mt-3 w-100" onClick={() => navigate(`/perfil/${user.idUsuario}`)}>Ver perfil</button>
                   </div>
-                </div>
-              ))
+                ))}
+
+                {/* --- PAGINACIÓN ESTILO BUSCADOR PARA USUARIOS --- */}
+                {totalPaginasUsuarios > 1 && (
+                  <div className="col-12">
+                    <div className="pagination-wrapper d-flex justify-content-center align-items-center mt-5 mb-3 gap-2">
+                      <button
+                        className="btn btn-outline-success"
+                        onClick={() => cambiarPagina(paginaActual - 1)}
+                        disabled={paginaActual === 1}
+                      >
+                        <i className="bi bi-chevron-left"></i>
+                      </button>
+
+                      <div className="d-none d-sm-flex">
+                        {renderNumerosPagina(totalPaginasUsuarios)}
+                      </div>
+
+                      <button
+                        className="btn btn-outline-success"
+                        onClick={() => cambiarPagina(paginaActual + 1)}
+                        disabled={paginaActual === totalPaginasUsuarios}
+                      >
+                        <i className="bi bi-chevron-right"></i>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center w-100 py-5">
                 <i className="bi bi-emoji-frown display-1 text-muted mb-3 opacity-50"></i>

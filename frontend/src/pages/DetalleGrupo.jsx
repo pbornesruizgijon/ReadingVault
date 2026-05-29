@@ -30,6 +30,7 @@ export default function DetalleGrupo() {
   const sesion = JSON.parse(localStorage.getItem("usuario"));
   const token = localStorage.getItem("token");
 
+  
   // Toast
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
   const toastTimeoutRef = useRef(null);
@@ -673,8 +674,8 @@ export default function DetalleGrupo() {
                                 rows="2"
                               />
                               <div className="d-flex gap-2 justify-content-end">
-                                <button className="btn btn-sm btn-secondary rounded-3" onClick={() => setIdMensajeEditando(null)}>Cancelar</button>
-                                <button className="btn btn-sm text-white rounded-3" style={{ backgroundColor: '#7c4d3a' }} onClick={() => handleGuardarEdicion(msg.idMensaje)}>Guardar</button>
+                                <button className="btn btn-sm btn-secondary btn-cancelar-edicion rounded-3" onClick={() => setIdMensajeEditando(null)}>Cancelar</button>
+                                <button className="btn btn-sm text-white btn-guardar-edicion rounded-3" style={{ backgroundColor: '#7c4d3a' }} onClick={() => handleGuardarEdicion(msg.idMensaje)}>Guardar</button>
                               </div>
                             </div>
                           ) : (
@@ -785,11 +786,7 @@ export default function DetalleGrupo() {
             </div>
             
             <button 
-              className="btn w-100 text-white fw-bold" 
-              style={{ 
-                backgroundColor: errorProgreso ? '#a0a0a0' : '#7c4d3a',
-                cursor: errorProgreso ? 'not-allowed' : 'pointer'
-              }} 
+              className="btn w-100 text-white fw-bold btn-guardar-progreso" 
               onClick={guardarProgreso}
               disabled={!!errorProgreso || progreso.pagina === ""}
             >
