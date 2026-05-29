@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import RetoHeader from "../components/RetoHeader";
 import "../assets/css/paginaReto.css";
+import Confetti from 'react-confetti';
 
 const Reto = () => {
   const [paginasPasadas, setPaginasPasadas] = useState([]);
@@ -63,7 +64,7 @@ const Reto = () => {
 
   const crearRetoAnual = () => {
     const num = parseInt(nuevoObjetivo);
-    if (isNaN(num) || num <= 0) {
+    if (isNaN(num) || num <= 0 || num > 365) {
       mostrarNotificacion("Introduce un número de libros válido", "error");
       return;
     }
@@ -171,9 +172,18 @@ const Reto = () => {
   const porcentaje = datosReto.objetivo > 0 
     ? Math.min((datosReto.leidos / datosReto.objetivo) * 100, 100)
     : 0;
-
+  const retoSuperado = datosReto.objetivo > 0 && datosReto.leidos >= datosReto.objetivo;
   return (
     <div className="pagina-reto">
+      {retoSuperado && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          numberOfPieces={800} 
+          recycle={false} 
+          style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}
+        />
+      )}
       <RetoHeader />
 
       <main className="reto-main-content">

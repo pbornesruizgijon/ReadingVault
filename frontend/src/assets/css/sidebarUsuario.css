@@ -87,3 +87,14 @@
     border-radius: 10px;
     transition: width 1s ease-in-out;
 }
+
+.btn-crear-reto {
+  background-color: var(--color-salmon); 
+  color: white !important; 
+  transition: all 0.3s ease; 
+}
+
+.btn-crear-reto:hover {
+  background-color: var(--color-amarillo); 
+  color: var(--color-verde-oscuro) !important; 
+}

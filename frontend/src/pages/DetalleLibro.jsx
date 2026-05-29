@@ -436,9 +436,15 @@ export default function DetalleLibro() {
         </div>
       </section>
 
+<h2 className="text-center detalle-titulo-seccion ">Valoraciones y reseñas</h2>
+
       {/* --- SECCIÓN RESEÑAS --- */}
       <section className="detalle-reviews-bg py-5">
         <div className="container-custom" style={{ maxWidth: '900px' }}>
+          
+
+          
+
           {/* EDITOR */}
           {usuarioSesion && miVoto > 0 && (escribiendo || !resenasComunidad.some(r => r.usuario.idUsuario === usuarioSesion.idUsuario && r.contenido)) && (
             <div className="seccion-escribir-resena mb-5">
@@ -452,7 +458,7 @@ export default function DetalleLibro() {
               />
               <div className="steam-acciones">
                 {escribiendo && (
-                  <button className="btn-steam" style={{backgroundColor: '#6c757d', color: 'white'}} onClick={() => setEscribiendo(false)}>
+                  <button className="btn-steam" style={{backgroundColor: "var(--color-rojo-vino)", color: 'white'}} onClick={() => setEscribiendo(false)}>
                     Cancelar
                   </button>
                 )}
@@ -462,8 +468,6 @@ export default function DetalleLibro() {
               </div>
             </div>
           )}
-
-          <h2 className="text-center mb-5 detalle-titulo-seccion">Valoraciones y reseñas</h2>
           
           <div className="d-flex flex-column gap-4">
             {/* TU RESEÑA DESTACADA */}
